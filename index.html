@@ -88,25 +88,6 @@ body{
 @keyframes jelly{0%,100%{transform:translateY(0) rotate(var(--r));}50%{transform:translateY(-5px) rotate(var(--r));}}
 .title .s{color:#ffb3d9;}
 
-/* 猫 + 分数 一行 */
-.hero{position:relative; display:flex; align-items:center; justify-content:center; gap:14px; margin:6px 0 2px;}
-.cat-stage{position:relative; width:84px; height:84px; flex:none;
-  display:flex; align-items:center; justify-content:center; animation:floaty 4.2s ease-in-out infinite;}
-@keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
-/* 优化后的单层光环：柔光晕 + 一圈细光环 */
-.aura{position:absolute; left:50%; top:50%; width:108px; height:108px; margin:-54px 0 0 -54px;
-  border-radius:50%; background:radial-gradient(circle, rgba(255,200,235,.55), rgba(180,140,255,.18) 55%, transparent 72%);}
-.aura::before{content:''; position:absolute; inset:6px; border-radius:50%;
-  border:2px solid rgba(255,225,154,.4); box-shadow:inset 0 0 14px rgba(255,225,154,.4); animation:spin 26s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.cat{width:84px; height:84px; cursor:pointer; position:relative; z-index:2; transition:transform .15s;
-  filter:drop-shadow(0 4px 8px rgba(40,20,66,.45));}
-.cat:active{transform:scale(.92);}
-.cat.happy{animation:bounce .55s ease;}
-@keyframes bounce{0%,100%{transform:translateY(0) rotate(0);}30%{transform:translateY(-9px) rotate(-5deg);}60%{transform:translateY(-3px) rotate(4deg);}}
-.eye{transform-origin:center; animation:blink 5s infinite;}
-@keyframes blink{0%,92%,100%{transform:scaleY(1);}96%{transform:scaleY(.1);}}
-
 .chip{display:flex; align-items:center; gap:4px; border-radius:13px; padding:4px 10px; background:rgba(255,255,255,.14); border:1.5px solid #d4b3f7;}
 .chip i{font-size:14px; color:#ffe19a;}
 .chip.score{display:inline-flex; align-items:center; gap:6px; border-radius:999px;
@@ -115,19 +96,6 @@ body{
 .chip.score .sx{font-size:13px; font-style:normal; font-weight:600; color:#ffe08a; text-shadow:0 0 7px rgba(255,224,138,.7);}
 .chip.score #score{font-family:'Fredoka',sans-serif; font-weight:600; font-size:18px; color:#fff3c8;
   min-width:18px; text-align:center;}
-
-.energy{margin-top:9px; display:flex; align-items:center; gap:9px;}
-.energy>i{font-size:18px; color:#ffd9f0;}
-.bar{flex:1; height:13px; border-radius:8px; background:rgba(255,255,255,.16); border:1.5px solid rgba(255,255,255,.28); overflow:hidden; box-shadow:0 0 12px rgba(255,180,225,.35);}
-.bar>span{display:block; height:100%; width:0%; background:linear-gradient(90deg,#ffb3d9,#d4a4f7,#9fd4ff,#b3f0d9); transition:width .4s ease;}
-.energy .val{font-size:13px; color:#ffd9f0; font-family:'Fredoka',sans-serif; min-width:58px; text-align:right;}
-.frostbtn{flex:none; width:42px; height:42px; border-radius:50%; border:2.5px solid #c9b3f7; cursor:pointer;
-  background:radial-gradient(circle,#6a52c0,#3e2c7e); color:#e8d8ff; font-size:21px; line-height:1;
-  display:flex; align-items:center; justify-content:center; transition:transform .12s, box-shadow .2s, filter .2s;
-  box-shadow:0 0 14px rgba(150,190,255,.5);}
-.frostbtn:active{transform:scale(.92);}
-.frostbtn.off{opacity:.4; filter:grayscale(.6); cursor:not-allowed;}
-.frostbtn.ready{animation:readyglow 1.5s ease-in-out infinite;}
 
 /* 底部 5 个功能（平铺一排，手绘图标 + 扣分） */
 .energy{display:flex; align-items:center; gap:8px; margin-top:10px;}
@@ -241,24 +209,7 @@ body{
 .preview{margin:9px auto 0; position:relative;
   width:calc(var(--cols)*var(--cell)); height:var(--cell);
   border-radius:14px; background:rgba(255,255,255,.08); border:2px dashed #ffc8eb; overflow:visible;}
-.plabel{position:absolute; left:8px; top:-11px; font-size:11px; background:#9b6bd6; color:#fff3c8;
-  padding:1px 8px; border-radius:8px; z-index:5; box-shadow:0 0 8px rgba(255,200,235,.4);}
 
-.tools{margin-top:11px; display:flex; justify-content:space-around;}
-.tool{background:none; border:0; cursor:pointer; text-align:center; font-family:inherit; color:#ffe9f7;}
-.tool .orb{width:50px; height:50px; border-radius:50%; margin:0 auto;
-  background:radial-gradient(circle,#6a44a8,#4a2c7e);
-  display:flex; align-items:center; justify-content:center; font-size:24px;
-  transition:transform .12s, box-shadow .2s, filter .2s;}
-.tool .orb.pop{animation:pop .42s ease;}
-.tool .lbl{font-size:12px; margin-top:5px;}
-.tool[data-k=exit] .orb{border:2.5px solid #ffb3d9; color:#ffc8eb; box-shadow:0 0 16px rgba(255,180,225,.55);}
-.tool[data-k=skill] .orb{border:2.5px solid #ffd0e6; color:#fff; box-shadow:0 0 16px rgba(255,143,196,.6);}
-.tool[data-k=stop] .orb{border:2.5px solid #d4b3f7; color:#e8d4ff; box-shadow:0 0 16px rgba(212,164,247,.55);}
-.tool[data-k=energy] .orb{border:2.5px solid #ffe19a; color:#fff3c8; box-shadow:0 0 16px rgba(255,225,154,.55);}
-.tool.off{opacity:.42; filter:grayscale(.6);}
-.tool.ready .orb{animation:readyglow 1.3s ease-in-out infinite;}
-@keyframes readyglow{0%,100%{box-shadow:0 0 16px rgba(255,143,196,.6);}50%{box-shadow:0 0 26px 6px rgba(255,143,196,.95);}}
 
 /* 加入主屏横幅（悬浮，不占布局高度，浮在顶栏下方/棋盘顶部） */
 .a2hs{position:absolute; left:0; right:0; top:84px; z-index:60;
@@ -318,8 +269,8 @@ body{
   opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; box-shadow:0 0 20px rgba(255,180,225,.4);}
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
-button:focus-visible, .cat:focus-visible, .candy:focus-visible{outline:3px solid #ffe19a; outline-offset:2px;}
-@media (prefers-reduced-motion:reduce){ .aurora,.bokeh i,.stars i,.cat-stage,.aura::before,.aura::after,.orbit,.title .jc,.candy{animation:none !important;} }
+button:focus-visible, .candy:focus-visible{outline:3px solid #ffe19a; outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){ .aurora,.bokeh i,.stars i,.title .jc,.candy{animation:none !important;} }
 </style>
 </head>
 <body>
@@ -748,10 +699,12 @@ function carEl(car){
   }
   return el;
 }
-function render(){
-  const seen=new Set();
-  for(const car of cars){ carEl(car); seen.add(car.id); }
-  for(const id in elmap){ if(!seen.has(+id)){ elmap[id].remove(); delete elmap[id]; } }
+let _prevSig='';
+function renderPreview(){
+  // 仅当预览内容或格子尺寸变化时才重建（避免每次渲染都重造预览糖果）
+  const sig=CELL+'|'+preview.map(p=>p.kind+'@'+p.col).join(',');
+  if(sig===_prevSig) return;
+  _prevSig=sig;
   prev.querySelectorAll('.candy').forEach(e=>e.remove());
   for(const p of preview){
     const el=document.createElement('div');
@@ -761,6 +714,12 @@ function render(){
     el.style.left=(p.col*CELL+3)+'px'; el.style.top='6px'; el.style.transition='none';
     prev.appendChild(el);
   }
+}
+function render(){
+  const seen=new Set();
+  for(const car of cars){ carEl(car); seen.add(car.id); }
+  for(const id in elmap){ if(!seen.has(+id)){ elmap[id].remove(); delete elmap[id]; } }
+  renderPreview();
   $('score').textContent=score;
   $('energyFill').style.width=(nitro/NITRO_MAX*100)+'%';
   $('energyVal').textContent=nitro;
