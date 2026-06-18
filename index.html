@@ -251,7 +251,14 @@ body{
 
 /* overlay */
 .overlay{position:fixed; inset:0; background:rgba(30,14,54,.66); display:none; align-items:center; justify-content:center; z-index:200; backdrop-filter:blur(2px);}
-.overlay.show{display:flex;}
+.overlay.show{display:flex; animation:ovIn .22s ease;}
+.overlay.show .panel{animation:panelIn .3s cubic-bezier(.34,1.4,.5,1);}
+.overlay.fadeout{animation:ovOut .3s ease forwards;}
+.overlay.fadeout .panel{animation:panelOut .3s ease forwards;}
+@keyframes ovIn{from{opacity:0;}to{opacity:1;}}
+@keyframes ovOut{from{opacity:1;}to{opacity:0;}}
+@keyframes panelIn{0%{transform:scale(.82); opacity:0;}100%{transform:scale(1); opacity:1;}}
+@keyframes panelOut{0%{transform:scale(1); opacity:1;}100%{transform:scale(.9) translateY(8px); opacity:0;}}
 .panel{background:linear-gradient(180deg,#5a3496,#3e2378); border:2px solid #ffc8eb; border-radius:20px;
   padding:20px; width:300px; text-align:center; color:#ffe9f7; box-shadow:0 0 40px rgba(255,180,225,.4);}
 .panel h2{margin:0 0 6px; color:#ffcf6e; text-shadow:0 1px 2px rgba(35,12,60,.5);}
@@ -853,7 +860,7 @@ async function openLeaderboard(fromGameOver){
   line.textContent = fromGameOver ? ('本局得分 '+score+' 分') : '';
   entry.innerHTML='';
   listEl.innerHTML='<div class="lb-empty">榜单加载中…</div>';
-  const showRestart=()=>{ btn.style.display='block'; btn.textContent='🔄 重新开始'; btn.classList.add('gold'); btn.onclick=()=>location.reload(); };
+  const showRestart=()=>{ btn.style.display='block'; btn.textContent='🔄 重新开始'; btn.classList.add('gold'); btn.onclick=restartGame; };
   const showClose=()=>{ btn.style.display='block'; btn.textContent='关闭'; btn.classList.remove('gold'); btn.onclick=()=>$('lbOverlay').classList.remove('show'); };
   // 结算时：等榜单加载好/超时再显示「重新开始」；浏览时：随时可关闭
   if(fromGameOver){ btn.style.display='none'; } else { showClose(); }
@@ -909,7 +916,7 @@ document.querySelectorAll('#skills .skill').forEach(b=>{
 // 设置弹窗
 $('setBtn').addEventListener('click', ()=>{ pop($('setBtn')); $('setOverlay').classList.add('show'); });
 $('setClose').onclick=()=>$('setOverlay').classList.remove('show');
-$('setRestart').onclick=()=>location.reload();
+$('setRestart').onclick=()=>{ const ov=$('setOverlay'); ov.classList.add('fadeout'); resetGame(); setTimeout(()=>{ ov.classList.remove('show','fadeout'); },300); };
 $('soundToggle').onclick=()=>{
   soundOn=!soundOn;
   $('soundToggle').textContent=(soundOn?'🔊 音效：开':'🔇 音效：关');
@@ -999,6 +1006,23 @@ function init(){
   preview=genRow();
   for(let i=0;i<4;i++){ spawn(); }
   gravity(); clearRows(); render();
+}
+// 页面内重开（不刷新整页）：清空状态 + 换新种子 + 重新开局，新糖果会滑入
+function resetGame(){
+  score=0; nitro=0; stall=0; busy=false; gameover=false; drag=null;
+  lbSubmitted=false; lbLast=null;
+  seed=((Date.now()^Math.floor(Math.random()*0x7fffffff))&0x7fffffff)||12345;  // 每次重开都换新序列
+  for(const id in elmap){ elmap[id].remove(); delete elmap[id]; }
+  cars=[]; preview=[]; nextId=1; _prevSig='';
+  board.classList.remove('pushing','frost');
+  init();
+}
+// 重新开始：结算弹窗淡出，同时后台开新局（糖果滑入），全程无白屏
+function restartGame(){
+  const ov=$('lbOverlay');
+  resetGame();
+  ov.classList.add('fadeout');
+  setTimeout(()=>{ ov.classList.remove('show','fadeout'); }, 300);
 }
 init();
 relayout();                                   // 按横幅最终显隐校正棋盘尺寸
