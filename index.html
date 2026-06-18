@@ -266,7 +266,7 @@ body{
   padding:8px 12px; border-radius:14px;
   background:linear-gradient(90deg,rgba(120,72,172,.94),rgba(150,92,182,.94));
   border:1.5px dashed #ffd66e; box-shadow:0 6px 18px rgba(20,8,40,.42), 0 0 14px rgba(255,200,120,.25);
-  backdrop-filter:blur(3px); animation:a2hsPulse 2.4s ease-in-out infinite;}
+  background-color:#7a4cac; animation:a2hsPulse 2.4s ease-in-out infinite;}
 .a2hs.hide{display:none;}
 @keyframes a2hsPulse{0%,100%{box-shadow:0 0 10px rgba(255,200,120,.2);}50%{box-shadow:0 0 18px rgba(255,200,120,.45);}}
 .a2hs img{width:32px; height:32px; border-radius:8px; flex:0 0 auto; box-shadow:0 0 0 1.5px rgba(255,255,255,.35);}
@@ -996,7 +996,7 @@ window.addEventListener('resize', ()=>{
 // ---------- 背景装饰 ----------
 (function(){
   const sw=$('stars');
-  for(let i=0;i<60;i++){ const s=document.createElement('i');
+  for(let i=0;i<25;i++){ const s=document.createElement('i');
     s.textContent=Math.random()<.3?'✦':'·';
     s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%';
     s.style.fontSize=(8+Math.random()*12)+'px'; s.style.animationDelay=(Math.random()*3.2)+'s'; sw.appendChild(s); }
@@ -1011,8 +1011,10 @@ window.addEventListener('resize', ()=>{
 })();
 let lastTrail=0;
 window.addEventListener('pointermove', e=>{
-  const now=Date.now(); if(now-lastTrail<70) return; lastTrail=now;
-  if(Math.random()>0.6) return;
+  // 仅桌面鼠标生成拖尾；触屏/拖糖果/动画进行中一律跳过（省电、避免与拖拽抢资源）
+  if(e.pointerType!=='mouse' || drag || busy) return;
+  const now=Date.now(); if(now-lastTrail<90) return; lastTrail=now;
+  if(Math.random()>0.5) return;
   const s=document.createElement('div'); s.className='trail'; s.textContent=Math.random()<.4?'✧':'·';
   s.style.left=e.clientX+'px'; s.style.top=e.clientY+'px'; s.style.fontSize=(9+Math.random()*6)+'px';
   document.body.appendChild(s); setTimeout(()=>s.remove(),700);
