@@ -21,30 +21,30 @@
   --cell:38px; --cols:8; --rows:11;
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-html,body{min-height:100%; background:#3e2378;}
+html,body{min-height:100%; background:#241248;}
 body{
   margin:0; position:relative;
   display:flex; align-items:flex-start; justify-content:center;
   height:100vh; overflow:hidden; user-select:none;
   padding:calc(8px + env(safe-area-inset-top, 0px)) 14px calc(8px + env(safe-area-inset-bottom, 0px));
   font-family:'ZCOOL KuaiLe','Fredoka','PingFang SC','Microsoft YaHei',sans-serif;
-  background:radial-gradient(150% 110% at 50% 0%, #a168cc 0%, #7c4cb0 34%, #5a3496 62%, #3e2378 100%) fixed;
+  background:radial-gradient(150% 115% at 50% -6%, #6a3aa8 0%, #4d2a8c 30%, #36206a 62%, #241248 100%) fixed;
 }
 
 .aurora{position:fixed; inset:-20%; z-index:0; pointer-events:none;
-  background:radial-gradient(40% 32% at 28% 18%, rgba(255,150,210,.28), transparent 60%),
-             radial-gradient(42% 34% at 76% 28%, rgba(150,200,255,.24), transparent 60%),
-             radial-gradient(38% 30% at 55% 75%, rgba(180,140,255,.22), transparent 60%);
+  background:radial-gradient(40% 32% at 28% 18%, rgba(226,90,180,.16), transparent 62%),
+             radial-gradient(42% 34% at 76% 28%, rgba(120,90,220,.14), transparent 62%),
+             radial-gradient(38% 30% at 55% 75%, rgba(150,90,225,.12), transparent 62%);
   animation:drift 18s ease-in-out infinite alternate;}
 @keyframes drift{0%{transform:translate(0,0) scale(1);}100%{transform:translate(-3%,2%) scale(1.08);}}
 .vignette{position:fixed; inset:0; z-index:0; pointer-events:none;
-  background:radial-gradient(125% 100% at 50% 32%, transparent 52%, rgba(38,18,66,.5) 100%);}
+  background:radial-gradient(125% 100% at 50% 30%, transparent 44%, rgba(22,10,46,.62) 100%);}
 .stars{position:fixed; inset:0; pointer-events:none; z-index:0;}
-.stars i{position:absolute; color:#fff; opacity:.85; animation:tw 3.2s ease-in-out infinite;}
+.stars i{position:absolute; color:#fff; opacity:.6; animation:tw 3.2s ease-in-out infinite;}
 @keyframes tw{0%,100%{opacity:.25; transform:scale(.7);}50%{opacity:.95; transform:scale(1.1);}}
 .bokeh{position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;}
 .bokeh i{position:absolute; bottom:-30px; border-radius:50%;
-  background:radial-gradient(circle, rgba(255,220,245,.55), rgba(255,220,245,0) 70%);
+  background:radial-gradient(circle, rgba(255,200,240,.28), rgba(255,200,240,0) 70%);
   animation:rise linear infinite;}
 @keyframes rise{0%{transform:translateY(0) scale(.6); opacity:0;}15%{opacity:.8;}100%{transform:translateY(-104vh) scale(1.1); opacity:0;}}
 
@@ -151,18 +151,18 @@ body{
 .board{
   margin:10px auto 0; position:relative;
   width:calc(var(--cols)*var(--cell)); height:calc(var(--rows)*var(--cell));
-  border-radius:18px; border:2px solid rgba(255,205,240,.6);
-  background-color:#3a225e;
+  border-radius:18px; border:2px solid rgba(190,140,235,.45);
+  background-color:#2c1a55;
   background-image:
-    radial-gradient(135% 75% at 50% -8%, rgba(190,135,240,.5), transparent 60%),
-    radial-gradient(120% 80% at 50% 108%, rgba(120,80,200,.4), transparent 60%),
-    radial-gradient(circle, rgba(255,228,250,.55) 1.2px, transparent 1.7px),
-    linear-gradient(rgba(255,205,240,.10) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,205,240,.10) 1px, transparent 1px);
+    radial-gradient(135% 75% at 50% -8%, rgba(150,95,210,.35), transparent 62%),
+    radial-gradient(120% 80% at 50% 108%, rgba(95,55,170,.32), transparent 62%),
+    radial-gradient(circle, rgba(210,180,245,.22) 1.1px, transparent 1.6px),
+    linear-gradient(rgba(200,160,235,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,160,235,.07) 1px, transparent 1px);
   background-size: 100% 100%, 100% 100%, var(--cell) var(--cell), var(--cell) var(--cell), var(--cell) var(--cell);
   background-position: 0 0, 0 0, calc(var(--cell)/2) calc(var(--cell)/2), 0 0, 0 0;
   overflow:hidden; touch-action:none;
-  box-shadow:inset 0 0 55px rgba(120,70,190,.55), 0 0 26px rgba(190,140,255,.35);
+  box-shadow:inset 0 0 60px rgba(60,30,120,.6), 0 0 22px rgba(150,100,220,.28);
 }
 .board.frost{animation:frost .9s ease;}
 @keyframes frost{0%{box-shadow:inset 0 0 0 0 rgba(180,220,255,0), 0 0 26px rgba(190,140,255,.35);}30%{box-shadow:inset 0 0 60px 16px rgba(180,220,255,.8), 0 0 30px rgba(180,220,255,.6);}100%{box-shadow:inset 0 0 55px rgba(120,70,190,.55), 0 0 26px rgba(190,140,255,.35);}}
@@ -368,7 +368,7 @@ button:focus-visible, .cat:focus-visible, .candy:focus-visible{outline:3px solid
       </svg>
       <span class="tx">拿走马卡龙</span><span class="cost">✦200</span></button>
 
-    <button class="skill off" data-c="m2g" data-cost="150" title="马卡龙变软糖：把场上每个马卡龙（4格）拆成 4 颗 1 格的小软糖，方便填行（消耗 150 能量）" style="--g:rgba(150,220,180,.8); background:linear-gradient(180deg,#bff0dc,#ffd24d)">
+    <button class="skill off" data-c="m2g" data-cost="150" title="马卡龙变软糖：把一个马卡龙（4格，优先最靠下的）拆成 4 颗 1 格小软糖，方便填行（消耗 150 能量）" style="--g:rgba(150,220,180,.8); background:linear-gradient(180deg,#bff0dc,#ffd24d)">
       <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="6" cy="12" r="4.6" fill="#5fd9a8"/>
         <path d="M11 12 h4 m-2.4 -2.4 l2.4 2.4 -2.4 2.4" stroke="#3a2168" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
@@ -407,7 +407,7 @@ button:focus-visible, .cat:focus-visible, .candy:focus-visible{outline:3px solid
       <h3>✦ 星星能量</h3>
       每消除一排积攒能量，攒够就能发动下方 4 个<b>工具</b>帮你解围：
       <br>• <b>拿走马卡龙</b> ✦200 — 清掉全场马卡龙<br>
-      • <b>马卡龙变软糖</b> ✦150 — 拆成小软糖好填行<br>
+      • <b>马卡龙变软糖</b> ✦150 — 拆「一个」马卡龙成小软糖好填行<br>
       • <b>软糖填底排</b> ✦50 — 塞满最底排空格<br>
       • <b>冻结3回合</b> ✦100 — 3 回合不出新糖
     </div>
@@ -444,21 +444,10 @@ button:focus-visible, .cat:focus-visible, .candy:focus-visible{outline:3px solid
   </div>
 </div>
 
-<!-- 游戏结束 -->
-<div class="overlay" id="overOverlay">
-  <div class="panel">
-    <h2>🌠 糖果堆到星河尽头啦！</h2>
-    <div class="tip" id="overMsg"></div>
-    <button class="bigbtn gold" id="btnRescue">🐱 猫咪奇遇 · 清底三排续命</button>
-    <button class="bigbtn" id="btnLeaderboard" style="margin-top:8px">🏆 上榜 · 看排行榜</button>
-    <button class="bigbtn" id="btnRestart" style="margin-top:8px">重新开局</button>
-  </div>
-</div>
-
-<!-- 联网排行榜 -->
+<!-- 联网排行榜（同时用作游戏结束结算页） -->
 <div class="overlay" id="lbOverlay">
   <div class="panel wide">
-    <h2>🏆 排行榜</h2>
+    <h2 id="lbTitle">🏆 排行榜</h2>
     <div class="tip" id="lbScoreLine"></div>
     <div id="lbEntry"></div>
     <div id="lbList"><div class="lb-empty">加载中…</div></div>
@@ -528,7 +517,7 @@ const sPower=()=>{ [523,659,784,1047,1319,1568].forEach((f,i)=>tone(f,i*0.05,0.5
 let cars=[], preview=[], nextId=1;
 let score=0, nitro=0;
 const NITRO_MAX=200;          // 能量上限
-let stall=0, busy=false, gameover=false, usedRescue=false, seed=12345;
+let stall=0, busy=false, gameover=false, seed=12345;
 const PCOST={take:200, m2g:150, gummy:50, freeze:100};  // 各功能消耗的星星能量
 
 function rnd(){ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; }
@@ -674,12 +663,13 @@ async function usePower(kind){
   if(kind==='take'){
     const n=cars.filter(c=>c.kind==='macaron').length;
     cars=cars.filter(c=>c.kind!=='macaron'); toast('猫咪拿走 '+n+' 个马卡龙！');
-  } else if(kind==='m2g'){            // 马卡龙 → 软糖（每个拆成 len 颗软糖）
-    const news=[]; cars=cars.filter(c=>{
-      if(c.kind!=='macaron') return true;
-      for(let i=0;i<c.len;i++) news.push({id:nextId++,kind:'gummy',len:1,row:c.row,col:c.col+i});
-      return false;
-    }); cars.push(...news); toast('马卡龙变软糖！');
+  } else if(kind==='m2g'){            // 只把「一个」马卡龙（优先最靠下的）拆成 len 颗小软糖
+    const macs=cars.filter(c=>c.kind==='macaron');
+    if(!macs.length){ nitro+=cost; render(); toast('场上没有马卡龙'); busy=false; return; }
+    let target=macs[0]; for(const m of macs) if(m.row>target.row) target=m;
+    cars=cars.filter(c=>c!==target);
+    for(let i=0;i<target.len;i++) cars.push({id:nextId++,kind:'gummy',len:1,row:target.row,col:target.col+i});
+    toast('一个马卡龙变成软糖！');
   } else if(kind==='gummy'){          // 只填最后一行（底行）的空格
     const g=buildGrid(0), r=ROWS-1;
     for(let cc=0; cc<COLS; cc++) if(!g[r][cc]) cars.push({id:nextId++,kind:'gummy',len:1,row:r,col:cc});
@@ -800,16 +790,7 @@ function attachDrag(el,id){
 // ---------- game over ----------
 function doGameOver(){
   gameover=true;
-  $('overMsg').textContent='最终得分 '+score+' 分！';
-  $('btnRescue').style.display=usedRescue?'none':'block';
-  $('overOverlay').classList.add('show');
-}
-function rescue(){
-  usedRescue=true;
-  cars=cars.filter(c=>c.row<ROWS-3);
-  gravity(); render(); gameover=false;
-  $('overOverlay').classList.remove('show');
-  toast('🐱 猫咪帮你清掉了底部三排！');
+  openLeaderboard(true);   // 结束直接进结算/排行榜
 }
 
 // ---------- toast / fx ----------
@@ -844,7 +825,7 @@ function heart(el){
 // ---------- 联网排行榜（Supabase） ----------
 // anonKey 是「公开」key，可放前端，安全靠数据库 RLS 策略与下方校验兜底。
 const SUPA={ url:'https://gucophydteoupaxqwasj.supabase.co', anonKey:'sb_publishable_Nd1P_w7n8HaIKj762RDh2A_N_sQ41NI' };
-const LB_TABLE='candy_scores', LB_SIZE=20, NAME_MAX=12;
+const LB_TABLE='candy_scores', LB_SIZE=10, NAME_MAX=12;
 // 前端兜底违禁词（非穷举，正式上线建议配合服务端内容安全）
 const BADWORDS=[
   'fuck','shit','bitch','cunt','asshole','dick','pussy','bastard','nigger','faggot','whore','slut','rape','nazi','hitler',
@@ -881,11 +862,27 @@ function lbListHTML(list, hl){
   return h+'</ol>';
 }
 let lbSubmitted=false, lbLast=null;
-async function openLeaderboard(submit){
+function lbQualifies(list){           // 是否能进前十
+  if(score<=0) return false;
+  if(list.length < LB_SIZE) return true;
+  return score > list[list.length-1].score;
+}
+async function openLeaderboard(fromGameOver){
   $('lbOverlay').classList.add('show');
-  const line=$('lbScoreLine'), entry=$('lbEntry'), listEl=$('lbList');
-  line.textContent = submit ? ('本局得分 '+score+' 分') : '';
-  if(submit && score>0 && !lbSubmitted){
+  const title=$('lbTitle'), line=$('lbScoreLine'), entry=$('lbEntry'), listEl=$('lbList'), btn=$('lbClose');
+  title.textContent = fromGameOver ? '🌠 本局结束' : '🏆 排行榜 · 前十';
+  line.textContent = fromGameOver ? ('本局得分 '+score+' 分') : '';
+  entry.innerHTML='';
+  listEl.innerHTML='<div class="lb-empty">加载中…</div>';
+  // 底部按钮：结算时=重新开始；平时=关闭
+  if(fromGameOver){ btn.textContent='🔄 重新开始'; btn.classList.add('gold'); btn.onclick=()=>location.reload(); }
+  else { btn.textContent='关闭'; btn.classList.remove('gold'); btn.onclick=()=>$('lbOverlay').classList.remove('show'); }
+  let top=null;
+  try{ top=await lbTop(); }
+  catch(e){ listEl.innerHTML='<div class="lb-empty">😿 联网失败，请检查网络后重试</div>'; return; }
+  // 能上榜（前十）→ 提示输入名字；否则直接显示榜单
+  if(fromGameOver && !lbSubmitted && lbQualifies(top)){
+    line.textContent='🎉 冲进前十！留名上榜：';
     entry.innerHTML='<input id="lbName" maxlength="'+NAME_MAX+'" placeholder="输入名字（最多 '+NAME_MAX+' 字）" autocomplete="off">'
       +'<div id="lbErr" class="ov-err"></div>'
       +'<button id="lbSave" class="bigbtn gold">保存成绩</button>';
@@ -893,10 +890,8 @@ async function openLeaderboard(submit){
     $('lbSave').onclick=()=>submitScore(inp.value);
     inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); submitScore(inp.value); } });
     inp.addEventListener('input',()=>{ const er=$('lbErr'); if(er)er.textContent=''; });
-  } else { entry.innerHTML=''; }
-  listEl.innerHTML='<div class="lb-empty">加载中…</div>';
-  try{ const top=await lbTop(); listEl.innerHTML=lbListHTML(top, lbSubmitted?lbLast:null); }
-  catch(e){ listEl.innerHTML='<div class="lb-empty">😿 联网失败，请检查网络后重试</div>'; }
+  }
+  listEl.innerHTML=lbListHTML(top, lbSubmitted?lbLast:null);
 }
 async function submitScore(raw){
   const v=validateName(raw); const er=$('lbErr');
@@ -914,8 +909,6 @@ async function submitScore(raw){
   }
 }
 $('lbBtn').addEventListener('click', ()=>{ pop($('lbBtn')); openLeaderboard(false); });
-$('lbClose').onclick=()=>$('lbOverlay').classList.remove('show');
-$('btnLeaderboard').onclick=()=>{ $('overOverlay').classList.remove('show'); openLeaderboard(true); };
 
 // ---------- ui wiring ----------
 document.querySelectorAll('[data-toast]').forEach(b=>
@@ -925,8 +918,6 @@ document.querySelectorAll('[data-toast]').forEach(b=>
 document.querySelectorAll('#skills .skill').forEach(b=>{
   b.addEventListener('click', ()=>{ ac(); usePower(b.dataset.c); });
 });
-$('btnRescue').onclick=rescue;
-$('btnRestart').onclick=()=>location.reload();
 
 // 设置弹窗
 $('setBtn').addEventListener('click', ()=>{ pop($('setBtn')); $('setOverlay').classList.add('show'); });
