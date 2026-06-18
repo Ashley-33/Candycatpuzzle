@@ -237,9 +237,9 @@ body{
 
 .preview{margin:9px auto 0; position:relative;
   width:calc(var(--cols)*var(--cell)); height:var(--cell);
-  border-radius:14px; background:rgba(255,255,255,.08); border:2px dashed #ffc8eb; overflow:hidden;}
-.plabel{position:absolute; left:8px; top:-10px; font-size:11px; background:#9b6bd6; color:#fff3c8;
-  padding:1px 8px; border-radius:8px; z-index:3; box-shadow:0 0 8px rgba(255,200,235,.4);}
+  border-radius:14px; background:rgba(255,255,255,.08); border:2px dashed #ffc8eb; overflow:visible;}
+.plabel{position:absolute; left:8px; top:-11px; font-size:11px; background:#9b6bd6; color:#fff3c8;
+  padding:1px 8px; border-radius:8px; z-index:5; box-shadow:0 0 8px rgba(255,200,235,.4);}
 
 .tools{margin-top:11px; display:flex; justify-content:space-around;}
 .tool{background:none; border:0; cursor:pointer; text-align:center; font-family:inherit; color:#ffe9f7;}
@@ -616,8 +616,8 @@ function fullRowsNow(){
 function applyRewards(c){
   if(!c) return;
   score+=5*c;
-  nitro=Math.min(NITRO_MAX, nitro+25*c);   // 消除积攒星星能量
-  toast('🎉 消除 '+c+' 排！+'+(5*c)+' 分，+'+(25*c)+' 能量');
+  nitro=Math.min(NITRO_MAX, nitro+10*c);   // 消除积攒星星能量
+  toast('🎉 消除 '+c+' 排！+'+(5*c)+' 分，+'+(10*c)+' 能量');
 }
 async function resolveClears(){
   let total=0;
