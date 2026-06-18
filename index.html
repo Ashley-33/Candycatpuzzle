@@ -353,7 +353,7 @@ button:focus-visible, .cat:focus-visible, .candy:focus-visible{outline:3px solid
 
   <div class="board" id="board" aria-label="糖果棋盘"></div>
 
-  <div class="preview" id="preview"><div class="plabel">下一波 ↓</div></div>
+  <div class="preview" id="preview"></div>
 
   <div class="energy" id="energyBar" title="星星能量：消除整排积攒，用来发动下面的工具">
     <i class="estar">✦</i>
@@ -884,19 +884,27 @@ function lbQualifies(list){           // 是否能进前十
   if(list.length < LB_SIZE) return true;
   return score > list[list.length-1].score;
 }
+const LB_TIMEOUT=8000;   // 排行榜加载超时（毫秒）：超过就提示无法获取
 async function openLeaderboard(fromGameOver){
   $('lbOverlay').classList.add('show');
   const title=$('lbTitle'), line=$('lbScoreLine'), entry=$('lbEntry'), listEl=$('lbList'), btn=$('lbClose');
   title.textContent = fromGameOver ? '🌠 本局结束' : '🏆 排行榜 · 前十';
   line.textContent = fromGameOver ? ('本局得分 '+score+' 分') : '';
   entry.innerHTML='';
-  listEl.innerHTML='<div class="lb-empty">加载中…</div>';
-  // 底部按钮：结算时=重新开始；平时=关闭
-  if(fromGameOver){ btn.textContent='🔄 重新开始'; btn.classList.add('gold'); btn.onclick=()=>location.reload(); }
-  else { btn.textContent='关闭'; btn.classList.remove('gold'); btn.onclick=()=>$('lbOverlay').classList.remove('show'); }
-  let top=null;
-  try{ top=await lbTop(); }
-  catch(e){ listEl.innerHTML='<div class="lb-empty">😿 联网失败，请检查网络后重试</div>'; return; }
+  listEl.innerHTML='<div class="lb-empty">榜单加载中…</div>';
+  const showRestart=()=>{ btn.style.display='block'; btn.textContent='🔄 重新开始'; btn.classList.add('gold'); btn.onclick=()=>location.reload(); };
+  const showClose=()=>{ btn.style.display='block'; btn.textContent='关闭'; btn.classList.remove('gold'); btn.onclick=()=>$('lbOverlay').classList.remove('show'); };
+  // 结算时：等榜单加载好/超时再显示「重新开始」；浏览时：随时可关闭
+  if(fromGameOver){ btn.style.display='none'; } else { showClose(); }
+  let top=null, failed=false;
+  try{
+    top=await Promise.race([ lbTop(), new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), LB_TIMEOUT)) ]);
+  }catch(e){ failed=true; }
+  if(failed){
+    listEl.innerHTML='<div class="lb-empty">😿 暂时无法获取排行榜，请检查网络</div>';
+    if(fromGameOver) showRestart();
+    return;
+  }
   // 能上榜（前十）→ 提示输入名字；否则直接显示榜单
   if(fromGameOver && !lbSubmitted && lbQualifies(top)){
     line.textContent='🎉 冲进前十！留名上榜：';
@@ -909,6 +917,7 @@ async function openLeaderboard(fromGameOver){
     inp.addEventListener('input',()=>{ const er=$('lbErr'); if(er)er.textContent=''; });
   }
   listEl.innerHTML=lbListHTML(top, lbSubmitted?lbLast:null);
+  if(fromGameOver) showRestart();   // 榜单出来后再显示重新开始
 }
 async function submitScore(raw){
   const v=validateName(raw); const er=$('lbErr');
