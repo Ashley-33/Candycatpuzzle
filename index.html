@@ -359,22 +359,29 @@ button:focus-visible, .cat:focus-visible, .candy:focus-visible{outline:3px solid
   </div>
 
   <div class="skills" id="skills">
-    <button class="skill off" data-c="take" data-cost="200" title="拿走马卡龙：把场上所有马卡龙（4格绿色那种）全部清除消失（消耗 200 能量）" style="--g:rgba(126,227,191,.8); background:linear-gradient(180deg,#bff0dc,#5fd9a8)">
+    <button class="skill off" data-c="freeze" data-cost="200" title="冻结3回合：接下来 3 个回合顶部不再推入新糖果，给你时间慢慢消除（消耗 200 能量）" style="--g:rgba(150,200,255,.8); background:linear-gradient(180deg,#cfe4ff,#7fb8f5)">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" stroke="#1f5a9e" stroke-width="1.8" stroke-linecap="round">
+        <path d="M12 3 v18 M3.8 7.5 L20.2 16.5 M20.2 7.5 L3.8 16.5"/>
+        <path d="M12 6.5 l-2.2 2 M12 6.5 l2.2 2 M12 17.5 l-2.2 -2 M12 17.5 l2.2 -2"/>
+      </svg>
+      <span class="tx">冻结3回合</span><span class="cost">✦200</span></button>
+
+    <button class="skill off" data-c="take" data-cost="150" title="拿走3马卡龙：随机清除场上最多 3 个马卡龙（4格绿色那种）（消耗 150 能量）" style="--g:rgba(126,227,191,.8); background:linear-gradient(180deg,#bff0dc,#5fd9a8)">
       <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
         <ellipse cx="11" cy="16" rx="7" ry="3.6" fill="#2ea86f"/>
         <ellipse cx="11" cy="12" rx="7" ry="3.6" fill="#eafff6"/>
         <ellipse cx="11" cy="11" rx="7" ry="3.6" fill="#7ee3bf"/>
         <path d="M16.5 8.5 L21 4 M21 4 l-3.6 0 M21 4 l0 3.6" stroke="#1f7a4f" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <span class="tx">拿走马卡龙</span><span class="cost">✦200</span></button>
+      <span class="tx">拿走3马卡龙</span><span class="cost">✦150</span></button>
 
-    <button class="skill off" data-c="m2g" data-cost="150" title="马卡龙变软糖：把一个马卡龙（4格，优先最靠下的）拆成 4 颗 1 格小软糖，方便填行（消耗 150 能量）" style="--g:rgba(150,220,180,.8); background:linear-gradient(180deg,#bff0dc,#ffd24d)">
+    <button class="skill off" data-c="m2g" data-cost="100" title="马卡龙变软糖：把一个马卡龙（4格，优先最靠下的）拆成 4 颗 1 格小软糖，方便填行（消耗 100 能量）" style="--g:rgba(150,220,180,.8); background:linear-gradient(180deg,#bff0dc,#ffd24d)">
       <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="6" cy="12" r="4.6" fill="#5fd9a8"/>
         <path d="M11 12 h4 m-2.4 -2.4 l2.4 2.4 -2.4 2.4" stroke="#3a2168" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M19 7.5 C15.4 12 15.4 16 19 16 C22.6 16 22.6 12 19 7.5 Z" fill="#ffcf3d"/>
       </svg>
-      <span class="tx">马卡龙变软糖</span><span class="cost">✦150</span></button>
+      <span class="tx">马卡龙变软糖</span><span class="cost">✦100</span></button>
 
     <button class="skill off" data-c="gummy" data-cost="50" title="软糖填底排：在最底下那一行的空格里塞满小软糖，帮你把底行凑满消除（消耗 50 能量）" style="--g:rgba(255,217,102,.8); background:linear-gradient(180deg,#ffe9a8,#ffce3d)">
       <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
@@ -383,13 +390,6 @@ button:focus-visible, .cat:focus-visible, .candy:focus-visible{outline:3px solid
         <rect x="4" y="18" width="16" height="3" rx="1.5" fill="#7a5300" opacity=".55"/>
       </svg>
       <span class="tx">软糖填底排</span><span class="cost">✦50</span></button>
-
-    <button class="skill off" data-c="freeze" data-cost="100" title="冻结3回合：接下来 3 个回合顶部不再推入新糖果，给你时间慢慢消除（消耗 100 能量）" style="--g:rgba(150,200,255,.8); background:linear-gradient(180deg,#cfe4ff,#7fb8f5)">
-      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" stroke="#1f5a9e" stroke-width="1.8" stroke-linecap="round">
-        <path d="M12 3 v18 M3.8 7.5 L20.2 16.5 M20.2 7.5 L3.8 16.5"/>
-        <path d="M12 6.5 l-2.2 2 M12 6.5 l2.2 2 M12 17.5 l-2.2 -2 M12 17.5 l2.2 -2"/>
-      </svg>
-      <span class="tx">冻结3回合</span><span class="cost">✦100</span></button>
   </div>
 </div>
 
@@ -406,10 +406,10 @@ button:focus-visible, .cat:focus-visible, .candy:focus-visible{outline:3px solid
       • <b>马卡龙</b>（4格·彩珠）最占地方
       <h3>✦ 星星能量</h3>
       每消除一排积攒能量，攒够就能发动下方 4 个<b>工具</b>帮你解围：
-      <br>• <b>拿走马卡龙</b> ✦200 — 清掉全场马卡龙<br>
-      • <b>马卡龙变软糖</b> ✦150 — 拆「一个」马卡龙成小软糖好填行<br>
-      • <b>软糖填底排</b> ✦50 — 塞满最底排空格<br>
-      • <b>冻结3回合</b> ✦100 — 3 回合不出新糖
+      <br>• <b>冻结3回合</b> ✦200 — 3 回合不出新糖<br>
+      • <b>拿走3马卡龙</b> ✦150 — 随机清掉最多 3 个马卡龙<br>
+      • <b>马卡龙变软糖</b> ✦100 — 拆「一个」马卡龙成小软糖好填行<br>
+      • <b>软糖填底排</b> ✦50 — 塞满最底排空格
     </div>
     <button class="bigbtn gold" id="helpClose">开始玩 🐾</button>
   </div>
@@ -518,7 +518,7 @@ let cars=[], preview=[], nextId=1;
 let score=0, nitro=0;
 const NITRO_MAX=200;          // 能量上限
 let stall=0, busy=false, gameover=false, seed=12345;
-const PCOST={take:200, m2g:150, gummy:50, freeze:100};  // 各功能消耗的星星能量
+const PCOST={freeze:200, take:150, m2g:100, gummy:50};  // 各功能消耗的星星能量
 
 function rnd(){ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; }
 function ri(n){ return Math.floor(rnd()*n); }
@@ -660,9 +660,12 @@ async function usePower(kind){
   const cost=PCOST[kind]||0;
   if(nitro<cost){ toast('能量不足，需要 '+cost+' 能量'); return; }
   busy=true; sPower(); nitro-=cost; render();
-  if(kind==='take'){
-    const n=cars.filter(c=>c.kind==='macaron').length;
-    cars=cars.filter(c=>c.kind!=='macaron'); toast('猫咪拿走 '+n+' 个马卡龙！');
+  if(kind==='take'){                  // 随机清除最多 3 个马卡龙
+    const macs=cars.filter(c=>c.kind==='macaron');
+    if(!macs.length){ nitro+=cost; render(); toast('场上没有马卡龙'); busy=false; return; }
+    for(let i=macs.length-1;i>0;i--){ const j=ri(i+1); const t=macs[i]; macs[i]=macs[j]; macs[j]=t; }  // 洗牌
+    const pick=new Set(macs.slice(0,3));
+    cars=cars.filter(c=>!pick.has(c)); toast('猫咪随机拿走 '+pick.size+' 个马卡龙！');
   } else if(kind==='m2g'){            // 只把「一个」马卡龙（优先最靠下的）拆成 len 颗小软糖
     const macs=cars.filter(c=>c.kind==='macaron');
     if(!macs.length){ nitro+=cost; render(); toast('场上没有马卡龙'); busy=false; return; }
