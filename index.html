@@ -20,7 +20,10 @@
   --gold:#ffe19a; --cream:#fff3c8;
   --cell:38px; --cols:8; --rows:11;
 }
-*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none; -moz-user-select:none; user-select:none; -webkit-touch-callout:none;}
+/* 仅输入框可选中/可长按 */
+input{-webkit-user-select:text; user-select:text; -webkit-touch-callout:default;}
 html,body{min-height:100%; background:#241248;}
 body{
   margin:0; position:relative;
