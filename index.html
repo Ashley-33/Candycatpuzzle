@@ -145,10 +145,11 @@ body{
 
 /* ===== 糖果基础（定位 / 过渡 / 状态） ===== */
 .candy{
-  position:absolute; border-radius:999px; display:flex; align-items:center; justify-content:center;
+  position:absolute; top:0; left:0; border-radius:999px; display:flex; align-items:center; justify-content:center;
   z-index:2; cursor:grab; touch-action:none;
   box-shadow:0 2px 5px rgba(0,0,0,.28);
-  transition: top .18s cubic-bezier(.4,1.3,.6,1), left .12s ease;
+  /* 用独立的 translate 属性定位（GPU 合成，不触发布局/重绘）；与 transform:scale 自动叠加，互不干扰 */
+  transition: translate .18s cubic-bezier(.4,1.3,.6,1);
 }
 .candy.dragging{ cursor:grabbing; z-index:50; transition:none; transform:scale(1.05);
   filter:drop-shadow(0 8px 16px rgba(0,0,0,.35)); }
@@ -161,7 +162,7 @@ body{
   100%{ filter:brightness(1.7); transform:scale(.55); opacity:0; }
 }
 .candy.flash{ animation:flashpop .5s ease forwards; z-index:40; outline:3px solid #fff; }
-#board.pushing .candy{ transition: top .5s cubic-bezier(.33,1,.68,1), left .12s ease; }
+#board.pushing .candy{ transition: translate .5s cubic-bezier(.33,1,.68,1); }
 
 /* ===== 旋旋糖 ===== */
 .candy.t-swirl{overflow:hidden;
@@ -695,14 +696,13 @@ function carEl(car){
   }
   el.style.height=(CELL-12)+'px';
   el.style.width=(car.len*CELL-6)+'px';
-  el.style.left=(car.col*CELL+3)+'px';
-  const target=(car.row*CELL+6);
+  const x=(car.col*CELL+3), y=(car.row*CELL+6);
   if(fresh && car._enter){
-    el.style.top=((car.row+1.3)*CELL+6)+'px';
-    requestAnimationFrame(()=>{ el.style.top=target+'px'; });
+    el.style.translate=x+'px '+((car.row+1.3)*CELL+6)+'px';
+    requestAnimationFrame(()=>{ el.style.translate=x+'px '+y+'px'; });
     delete car._enter;
   } else {
-    el.style.top=target+'px';
+    el.style.translate=x+'px '+y+'px';
   }
   return el;
 }
@@ -718,7 +718,7 @@ function renderPreview(){
     el.className='candy ghost';
     buildCandy(el, p.kind);
     el.style.height=(CELL-12)+'px'; el.style.width=(p.len*CELL-6)+'px';
-    el.style.left=(p.col*CELL+3)+'px'; el.style.top='6px'; el.style.transition='none';
+    el.style.translate=(p.col*CELL+3)+'px 6px'; el.style.transition='none';
     prev.appendChild(el);
   }
 }
@@ -758,7 +758,7 @@ function attachDrag(el,id){
     const car=cars.find(c=>c.id===id);
     let dc=Math.round((e.clientX-drag.startX)/CELL);
     car.col=Math.max(drag.min,Math.min(drag.max,drag.orig+dc));
-    el.style.left=(car.col*CELL+3)+'px';
+    el.style.translate=(car.col*CELL+3)+'px '+(car.row*CELL+6)+'px';
   });
   const up=e=>{
     if(!drag||drag.id!==id) return;
