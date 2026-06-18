@@ -521,7 +521,9 @@ const sPower=()=>{ [523,659,784,1047,1319,1568].forEach((f,i)=>tone(f,i*0.05,0.5
 let cars=[], preview=[], nextId=1;
 let score=0, nitro=0;
 const NITRO_MAX=200;          // 能量上限
-let stall=0, busy=false, gameover=false, seed=12345;
+let stall=0, busy=false, gameover=false;
+// 每局随机种子：时间戳 + 随机数混合，保证每次开局序列都不同
+let seed=((Date.now()^Math.floor(Math.random()*0x7fffffff))&0x7fffffff)||12345;
 const PCOST={freeze:200, take:150, m2g:100, gummy:50};  // 各功能消耗的星星能量
 
 function rnd(){ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; }
