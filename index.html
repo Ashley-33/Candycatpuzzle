@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>喵喵糖果星</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="喵喵糖果星">
+<meta name="theme-color" content="#3e2378">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=ZCOOL+KuaiLe&display=swap');
+
+:root{
+  --pink:#ff8fc4; --lav:#b89cf0; --sky:#7fb8f5; --mint:#7ee3bf; --lemon:#ffd966;
+  --gold:#ffe19a; --cream:#fff3c8;
+  --cell:38px; --cols:8; --rows:11;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{min-height:100%; background:#3e2378;}
+body{
+  margin:0; position:relative;
+  display:flex; align-items:flex-start; justify-content:center;
+  height:100vh; overflow:hidden; user-select:none;
+  padding:calc(8px + env(safe-area-inset-top, 0px)) 14px calc(8px + env(safe-area-inset-bottom, 0px));
+  font-family:'ZCOOL KuaiLe','Fredoka','PingFang SC','Microsoft YaHei',sans-serif;
+  background:radial-gradient(150% 110% at 50% 0%, #a168cc 0%, #7c4cb0 34%, #5a3496 62%, #3e2378 100%) fixed;
+}
+
+.aurora{position:fixed; inset:-20%; z-index:0; pointer-events:none;
+  background:radial-gradient(40% 32% at 28% 18%, rgba(255,150,210,.28), transparent 60%),
+             radial-gradient(42% 34% at 76% 28%, rgba(150,200,255,.24), transparent 60%),
+             radial-gradient(38% 30% at 55% 75%, rgba(180,140,255,.22), transparent 60%);
+  animation:drift 18s ease-in-out infinite alternate;}
+@keyframes drift{0%{transform:translate(0,0) scale(1);}100%{transform:translate(-3%,2%) scale(1.08);}}
+.vignette{position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(125% 100% at 50% 32%, transparent 52%, rgba(38,18,66,.5) 100%);}
+.stars{position:fixed; inset:0; pointer-events:none; z-index:0;}
+.stars i{position:absolute; color:#fff; opacity:.85; animation:tw 3.2s ease-in-out infinite;}
+@keyframes tw{0%,100%{opacity:.25; transform:scale(.7);}50%{opacity:.95; transform:scale(1.1);}}
+.bokeh{position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;}
+.bokeh i{position:absolute; bottom:-30px; border-radius:50%;
+  background:radial-gradient(circle, rgba(255,220,245,.55), rgba(255,220,245,0) 70%);
+  animation:rise linear infinite;}
+@keyframes rise{0%{transform:translateY(0) scale(.6); opacity:0;}15%{opacity:.8;}100%{transform:translateY(-104vh) scale(1.1); opacity:0;}}
+
+.shoot{position:fixed; z-index:1; width:90px; height:2px; border-radius:2px;
+  background:linear-gradient(90deg, rgba(255,255,255,0), #fff, #ffe9f5);
+  box-shadow:0 0 8px #fff; pointer-events:none; transform:rotate(22deg);
+  animation:shoot 1.1s ease-in forwards;}
+@keyframes shoot{0%{opacity:0; transform:translate(0,0) rotate(22deg) scaleX(.2);}
+  12%{opacity:1;}100%{opacity:0; transform:translate(260px,150px) rotate(22deg) scaleX(1);}}
+
+.trail{position:fixed; z-index:60; pointer-events:none; color:#fff3c8; font-size:13px;
+  animation:fade .7s ease-out forwards;}
+@keyframes fade{0%{opacity:.95; transform:translate(-50%,-50%) scale(.5);}
+  100%{opacity:0; transform:translate(-50%,-160%) scale(1.1);}}
+
+.game{position:relative; z-index:1; width:calc(var(--cols) * var(--cell) + 28px); max-width:100%;}
+.glints{position:absolute; inset:0; pointer-events:none;}
+.glints i{position:absolute; color:#ffe9f5; animation:tw 4s ease-in-out infinite;}
+
+.icon-btn{width:34px; height:34px; border:0; border-radius:50%; cursor:pointer;
+  background:rgba(255,255,255,.16); color:#ffd9f0;
+  display:flex; align-items:center; justify-content:center; font-size:17px;
+  transition:transform .12s, background .2s; outline-offset:3px;}
+.icon-btn.help{border:2px solid #d4b3f7; color:#e8d4ff;}
+.icon-btn.set{border:2px solid #ffc8eb; color:#ffc8eb;}
+.icon-btn:hover{background:rgba(255,255,255,.28);}
+.icon-btn.pop{animation:pop .42s ease;}
+/* 顶栏：左=设置/帮助，右=分数 */
+.topbar{display:flex; align-items:center; justify-content:space-between; gap:8px; padding-top:2px;}
+.tb-left{display:flex; align-items:center; gap:8px;}
+@keyframes pop{0%{transform:scale(.86);}40%{transform:scale(1.14);}70%{transform:scale(.95);}100%{transform:scale(1);}}
+
+/* 标题 */
+.title{margin:8px 0 0; text-align:center; font-size:28px; letter-spacing:2px; color:var(--cream);
+  text-shadow:-2px -2px 0 #8c4ca8, 2px -2px 0 #8c4ca8, -2px 2px 0 #8c4ca8, 2px 2px 0 #8c4ca8,
+    0 5px 0 #6a3486, 0 0 22px rgba(255,200,235,.9);}
+.title .jc{display:inline-block; animation:jelly 2.8s ease-in-out infinite;}
+@keyframes jelly{0%,100%{transform:translateY(0) rotate(var(--r));}50%{transform:translateY(-5px) rotate(var(--r));}}
+.title .s{color:#ffb3d9;}
+
+/* 猫 + 分数 一行 */
+.hero{position:relative; display:flex; align-items:center; justify-content:center; gap:14px; margin:6px 0 2px;}
+.cat-stage{position:relative; width:84px; height:84px; flex:none;
+  display:flex; align-items:center; justify-content:center; animation:floaty 4.2s ease-in-out infinite;}
+@keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+/* 优化后的单层光环：柔光晕 + 一圈细光环 */
+.aura{position:absolute; left:50%; top:50%; width:108px; height:108px; margin:-54px 0 0 -54px;
+  border-radius:50%; background:radial-gradient(circle, rgba(255,200,235,.55), rgba(180,140,255,.18) 55%, transparent 72%);}
+.aura::before{content:''; position:absolute; inset:6px; border-radius:50%;
+  border:2px solid rgba(255,225,154,.4); box-shadow:inset 0 0 14px rgba(255,225,154,.4); animation:spin 26s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.cat{width:84px; height:84px; cursor:pointer; position:relative; z-index:2; transition:transform .15s;
+  filter:drop-shadow(0 4px 8px rgba(40,20,66,.45));}
+.cat:active{transform:scale(.92);}
+.cat.happy{animation:bounce .55s ease;}
+@keyframes bounce{0%,100%{transform:translateY(0) rotate(0);}30%{transform:translateY(-9px) rotate(-5deg);}60%{transform:translateY(-3px) rotate(4deg);}}
+.eye{transform-origin:center; animation:blink 5s infinite;}
+@keyframes blink{0%,92%,100%{transform:scaleY(1);}96%{transform:scaleY(.1);}}
+
+.chip{display:flex; align-items:center; gap:4px; border-radius:13px; padding:4px 10px; background:rgba(255,255,255,.14); border:1.5px solid #d4b3f7;}
+.chip i{font-size:14px; color:#ffe19a;}
+.chip.score{display:inline-flex; align-items:center; gap:6px; border-radius:999px;
+  padding:5px 15px; background:rgba(120,80,170,.25); border:2px solid #ffe08a;
+  box-shadow:0 0 14px rgba(255,224,138,.6), inset 0 0 8px rgba(255,224,138,.18);}
+.chip.score .sx{font-size:13px; font-style:normal; font-weight:600; color:#ffe08a; text-shadow:0 0 7px rgba(255,224,138,.7);}
+.chip.score #score{font-family:'Fredoka',sans-serif; font-weight:600; font-size:18px; color:#fff3c8;
+  min-width:18px; text-align:center;}
+
+.energy{margin-top:9px; display:flex; align-items:center; gap:9px;}
+.energy>i{font-size:18px; color:#ffd9f0;}
+.bar{flex:1; height:13px; border-radius:8px; background:rgba(255,255,255,.16); border:1.5px solid rgba(255,255,255,.28); overflow:hidden; box-shadow:0 0 12px rgba(255,180,225,.35);}
+.bar>span{display:block; height:100%; width:0%; background:linear-gradient(90deg,#ffb3d9,#d4a4f7,#9fd4ff,#b3f0d9); transition:width .4s ease;}
+.energy .val{font-size:13px; color:#ffd9f0; font-family:'Fredoka',sans-serif; min-width:58px; text-align:right;}
+.frostbtn{flex:none; width:42px; height:42px; border-radius:50%; border:2.5px solid #c9b3f7; cursor:pointer;
+  background:radial-gradient(circle,#6a52c0,#3e2c7e); color:#e8d8ff; font-size:21px; line-height:1;
+  display:flex; align-items:center; justify-content:center; transition:transform .12s, box-shadow .2s, filter .2s;
+  box-shadow:0 0 14px rgba(150,190,255,.5);}
+.frostbtn:active{transform:scale(.92);}
+.frostbtn.off{opacity:.4; filter:grayscale(.6); cursor:not-allowed;}
+.frostbtn.ready{animation:readyglow 1.5s ease-in-out infinite;}
+
+/* 底部 5 个功能（平铺一排，手绘图标 + 扣分） */
+.energy{display:flex; align-items:center; gap:8px; margin-top:10px;}
+.energy .estar{font-size:16px; color:#ffe08a; text-shadow:0 0 8px rgba(255,224,138,.9);}
+.etrack{flex:1; height:13px; border-radius:999px; background:rgba(255,255,255,.13);
+  border:1.5px solid rgba(255,224,138,.55); overflow:hidden; box-shadow:inset 0 1px 3px rgba(0,0,0,.28);}
+.efill{height:100%; width:0; border-radius:999px;
+  background:linear-gradient(90deg,#ffd24d,#ff8fc4 55%,#b3d6f9);
+  box-shadow:0 0 10px rgba(255,200,120,.75); transition:width .35s cubic-bezier(.33,1,.68,1);}
+.energy .eval{font-size:11px; color:#ffe9b8; min-width:48px; text-align:right; letter-spacing:.3px;}
+.energy .eval b{font-weight:700; color:#fff3c8;}
+.skills{margin-top:9px; display:flex; gap:4px;}
+.skill{flex:1; min-width:0; border:0; cursor:pointer; font-family:inherit; border-radius:12px;
+  padding:6px 1px 5px; color:#3a2168; font-weight:bold; line-height:1.1;
+  display:flex; flex-direction:column; align-items:center; gap:1px;
+  box-shadow:0 0 10px var(--g); transition:transform .12s, filter .2s, opacity .2s;}
+.skill .ic{width:24px; height:24px; display:block;}
+.skill .tx{font-size:10px;}
+.skill .cost{font-size:9px; font-weight:700; color:#6b3a00; background:rgba(255,255,255,.5);
+  border-radius:6px; padding:0 4px; margin-top:1px;}
+.skill:active{transform:translateY(2px) scale(.97);}
+.skill.off{opacity:.42; filter:grayscale(.55); cursor:not-allowed;}
+
+.board{
+  margin:10px auto 0; position:relative;
+  width:calc(var(--cols)*var(--cell)); height:calc(var(--rows)*var(--cell));
+  border-radius:18px; border:2px solid rgba(255,205,240,.6);
+  background-color:#3a225e;
+  background-image:
+    radial-gradient(135% 75% at 50% -8%, rgba(190,135,240,.5), transparent 60%),
+    radial-gradient(120% 80% at 50% 108%, rgba(120,80,200,.4), transparent 60%),
+    radial-gradient(circle, rgba(255,228,250,.55) 1.2px, transparent 1.7px),
+    linear-gradient(rgba(255,205,240,.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,205,240,.10) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, var(--cell) var(--cell), var(--cell) var(--cell), var(--cell) var(--cell);
+  background-position: 0 0, 0 0, calc(var(--cell)/2) calc(var(--cell)/2), 0 0, 0 0;
+  overflow:hidden; touch-action:none;
+  box-shadow:inset 0 0 55px rgba(120,70,190,.55), 0 0 26px rgba(190,140,255,.35);
+}
+.board.frost{animation:frost .9s ease;}
+@keyframes frost{0%{box-shadow:inset 0 0 0 0 rgba(180,220,255,0), 0 0 26px rgba(190,140,255,.35);}30%{box-shadow:inset 0 0 60px 16px rgba(180,220,255,.8), 0 0 30px rgba(180,220,255,.6);}100%{box-shadow:inset 0 0 55px rgba(120,70,190,.55), 0 0 26px rgba(190,140,255,.35);}}
+
+/* 糖丝（柔和星河版分隔虚线） */
+.lane{position:absolute; top:0; bottom:0; width:0; pointer-events:none; z-index:1;
+  border-left:2px dashed rgba(255,255,255,.18);}
+.lane.center{border-left-color:rgba(255,225,154,.34); border-left-width:3px;}
+
+/* ===== 糖果基础（定位 / 过渡 / 状态） ===== */
+.candy{
+  position:absolute; border-radius:999px; display:flex; align-items:center; justify-content:center;
+  z-index:2; cursor:grab; touch-action:none;
+  box-shadow:0 0 14px var(--g,rgba(255,200,235,.5));
+  transition: top .18s cubic-bezier(.4,1.3,.6,1), left .12s ease;
+}
+.candy.dragging{ cursor:grabbing; z-index:50; transition:none; transform:scale(1.05);
+  filter:drop-shadow(0 8px 16px rgba(0,0,0,.35)); }
+.candy.ghost{ opacity:.4; filter:grayscale(.2); box-shadow:none;
+  outline:2px dashed rgba(255,235,250,.6); outline-offset:-3px; transform:scale(.88); cursor:default; }
+@keyframes flashpop{
+  0%  { filter:brightness(1); transform:scale(1); }
+  35% { filter:brightness(2.2) saturate(1.4); transform:scale(1.08); box-shadow:0 0 26px 10px #fff; }
+  70% { filter:brightness(2.2) saturate(1.4); transform:scale(1.08); box-shadow:0 0 26px 10px #fff; }
+  100%{ filter:brightness(1.7); transform:scale(.55); opacity:0; }
+}
+.candy.flash{ animation:flashpop .5s ease forwards; z-index:40; outline:3px solid #fff; }
+#board.pushing .candy{ transition: top .5s cubic-bezier(.33,1,.68,1), left .12s ease; }
+
+/* ===== 旋旋糖 ===== */
+.candy.t-swirl{overflow:hidden;
+  box-shadow:0 0 16px var(--g), inset 0 5px 7px rgba(255,255,255,.7), inset 0 -6px 8px rgba(196,60,120,.32), inset 0 0 0 1.5px rgba(255,255,255,.4);
+  background:repeating-linear-gradient(122deg, var(--c1) 0 6px, #fff 6px 12px, var(--c2) 12px 18px, #fff 18px 24px);}
+.candy.t-swirl::before{content:''; position:absolute; left:10%; right:38%; top:8%; height:32%; border-radius:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,0)); pointer-events:none;}
+
+/* ===== 软糖 ===== */
+.candy.t-gummy{overflow:hidden;
+  box-shadow:0 0 18px var(--g), inset 0 5px 8px rgba(255,255,255,.8), inset 0 -6px 9px rgba(214,138,0,.4), inset 0 0 0 1.5px rgba(255,255,255,.35);
+  background:radial-gradient(120% 90% at 32% 22%, #fff6d6 0%, var(--c1) 34%, var(--c2) 100%);}
+.candy.t-gummy::before{content:''; position:absolute; left:14%; right:42%; top:9%; height:34%; border-radius:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,0)); pointer-events:none;}
+.candy.t-gummy::after{content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:radial-gradient(1.5px 1.5px at 24% 40%,rgba(255,255,255,.95),transparent),radial-gradient(1.5px 1.5px at 62% 62%,rgba(255,255,255,.85),transparent),radial-gradient(1.5px 1.5px at 78% 32%,rgba(255,255,255,.95),transparent);}
+
+/* ===== 马卡龙 ===== */
+.candy.t-macaron{display:flex; align-items:center; justify-content:center; box-shadow:none; filter:drop-shadow(0 2px 4px rgba(0,0,0,.18)) drop-shadow(0 0 7px var(--g)); border-radius:0;}
+.candy .mac{position:relative; height:100%; aspect-ratio:1; border-radius:50%; margin:0 -2px;
+  box-shadow:inset 0 3px 4px rgba(255,255,255,.75), inset 0 -4px 6px rgba(0,0,0,.16);}
+/* 左上角柔和高光小点 */
+.candy .mac::after{content:''; position:absolute; left:20%; top:14%; width:30%; height:24%;
+  border-radius:50%; background:radial-gradient(circle at 40% 40%,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);}
+
+/* ===== 巧克力（立体方格） ===== */
+.candy.t-choco{--seg:var(--cell); overflow:hidden; border-radius:7px;
+  box-shadow:0 0 14px rgba(110,65,35,.6), inset 0 0 0 1.5px rgba(54,30,14,.6);
+  background:linear-gradient(180deg,#a86b42 0%,#854f30 50%,#5e3a21 100%);}
+/* 每格的高光（左上亮）与阴影（右下暗），做出凸起方块感 */
+.candy.t-choco::before{content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(135deg, rgba(255,228,196,.55), rgba(255,228,196,0) 42%),
+    linear-gradient(315deg, rgba(40,22,10,.5), rgba(40,22,10,0) 46%);
+  background-size: var(--seg) 100%, var(--seg) 100%;}
+/* 格子之间的深色凹缝 */
+.candy.t-choco::after{content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0 calc(var(--seg) - 2.5px), rgba(44,24,11,.9) calc(var(--seg) - 2.5px) var(--seg)),
+    linear-gradient(180deg, rgba(255,238,214,.32) 0, transparent 30%);}
+
+.spark{position:absolute; pointer-events:none; font-size:14px; color:var(--cream); z-index:30; animation:fly .7s ease-out forwards;}
+@keyframes fly{0%{opacity:1; transform:translate(0,0) scale(.4);}100%{opacity:0; transform:translate(var(--dx),var(--dy)) scale(1.2);}}
+
+.preview{margin:9px auto 0; position:relative;
+  width:calc(var(--cols)*var(--cell)); height:var(--cell);
+  border-radius:14px; background:rgba(255,255,255,.08); border:2px dashed #ffc8eb; overflow:hidden;}
+.plabel{position:absolute; left:8px; top:-10px; font-size:11px; background:#9b6bd6; color:#fff3c8;
+  padding:1px 8px; border-radius:8px; z-index:3; box-shadow:0 0 8px rgba(255,200,235,.4);}
+
+.tools{margin-top:11px; display:flex; justify-content:space-around;}
+.tool{background:none; border:0; cursor:pointer; text-align:center; font-family:inherit; color:#ffe9f7;}
+.tool .orb{width:50px; height:50px; border-radius:50%; margin:0 auto;
+  background:radial-gradient(circle,#6a44a8,#4a2c7e);
+  display:flex; align-items:center; justify-content:center; font-size:24px;
+  transition:transform .12s, box-shadow .2s, filter .2s;}
+.tool .orb.pop{animation:pop .42s ease;}
+.tool .lbl{font-size:12px; margin-top:5px;}
+.tool[data-k=exit] .orb{border:2.5px solid #ffb3d9; color:#ffc8eb; box-shadow:0 0 16px rgba(255,180,225,.55);}
+.tool[data-k=skill] .orb{border:2.5px solid #ffd0e6; color:#fff; box-shadow:0 0 16px rgba(255,143,196,.6);}
+.tool[data-k=stop] .orb{border:2.5px solid #d4b3f7; color:#e8d4ff; box-shadow:0 0 16px rgba(212,164,247,.55);}
+.tool[data-k=energy] .orb{border:2.5px solid #ffe19a; color:#fff3c8; box-shadow:0 0 16px rgba(255,225,154,.55);}
+.tool.off{opacity:.42; filter:grayscale(.6);}
+.tool.ready .orb{animation:readyglow 1.3s ease-in-out infinite;}
+@keyframes readyglow{0%,100%{box-shadow:0 0 16px rgba(255,143,196,.6);}50%{box-shadow:0 0 26px 6px rgba(255,143,196,.95);}}
+
+/* 加入主屏横幅（文档流顶端，在顶栏之上） */
+.a2hs{display:flex; align-items:center; gap:9px; cursor:pointer; box-sizing:border-box;
+  margin:0 0 8px; padding:8px 12px; border-radius:14px;
+  background:linear-gradient(90deg,rgba(255,209,77,.20),rgba(255,143,196,.20));
+  border:1.5px dashed #ffd66e; box-shadow:0 0 14px rgba(255,200,120,.22);
+  animation:a2hsPulse 2.4s ease-in-out infinite;}
+.a2hs.hide{display:none;}
+@keyframes a2hsPulse{0%,100%{box-shadow:0 0 10px rgba(255,200,120,.2);}50%{box-shadow:0 0 18px rgba(255,200,120,.45);}}
+.a2hs img{width:32px; height:32px; border-radius:8px; flex:0 0 auto; box-shadow:0 0 0 1.5px rgba(255,255,255,.35);}
+.a2hs .a2txt{flex:1; min-width:0; text-align:left; line-height:1.25;}
+.a2hs .a2t1{font-size:12.5px; font-weight:700; color:#fff3c8;}
+.a2hs .a2t2{font-size:10.5px; color:#e7d4ff;}
+.a2hs .a2close{flex:0 0 auto; width:20px; height:20px; border:0; border-radius:50%; cursor:pointer;
+  background:rgba(255,255,255,.18); color:#ffe9f7; font-size:13px; line-height:1;}
+
+/* 玩法说明分段 */
+.help-sec{text-align:left; margin:10px 0; font-size:12.5px; color:#ecdcff; line-height:1.55;}
+.help-sec h3{margin:12px 0 4px; font-size:13px; color:#ffe08a;}
+.help-sec b{color:#fff3c8;}
+.steps{text-align:left; margin:10px 0; font-size:12.5px; color:#ecdcff; line-height:1.6;}
+.steps .os{margin:8px 0 3px; font-size:12.5px; font-weight:700; color:#ffe08a;}
+.panel.wide{width:330px; max-height:82vh; overflow-y:auto;}
+
+/* 排行榜 */
+#lbEntry input{width:100%; box-sizing:border-box; padding:9px 11px; margin-top:4px; border-radius:11px;
+  border:1.5px solid #d4b3f7; background:rgba(255,255,255,.12); color:#fff3c8; font-family:inherit; font-size:14px; outline:none;}
+#lbEntry input:focus{border-color:#ffe19a;}
+.ov-err{color:#ff9bc0; font-size:11px; min-height:14px; margin:3px 0 2px;}
+.lb-board{list-style:none; margin:8px 0; padding:0; text-align:left; max-height:46vh; overflow-y:auto;}
+.lb-board li{display:flex; align-items:center; gap:8px; padding:6px 9px; border-radius:9px; font-size:13.5px; color:#ecdcff;}
+.lb-board li:nth-child(odd){background:rgba(255,255,255,.05);}
+.lb-board li.me{background:rgba(255,209,77,.22); box-shadow:inset 0 0 0 1px rgba(255,209,77,.55); color:#fff3c8; font-weight:700;}
+.lb-board .rk{width:26px; text-align:center; flex:0 0 auto; font-weight:700;}
+.lb-board .nm{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.lb-board .sc{flex:0 0 auto; font-weight:700; color:#ffe08a;}
+.lb-empty{color:#d8c4f0; font-size:12.5px; padding:16px 0;}
+
+/* overlay */
+.overlay{position:fixed; inset:0; background:rgba(30,14,54,.66); display:none; align-items:center; justify-content:center; z-index:200; backdrop-filter:blur(2px);}
+.overlay.show{display:flex;}
+.panel{background:linear-gradient(180deg,#5a3496,#3e2378); border:2px solid #ffc8eb; border-radius:20px;
+  padding:20px; width:300px; text-align:center; color:#ffe9f7; box-shadow:0 0 40px rgba(255,180,225,.4);}
+.panel h2{margin:0 0 6px; color:#fff3c8; text-shadow:0 0 12px rgba(255,200,235,.7);}
+.panel .tip{font-size:12px; color:#d8c4f0; margin-bottom:6px;}
+.pick{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:12px 0;}
+.pick button{padding:11px 6px; border-radius:13px; border:0; font-family:inherit; font-size:13px; cursor:pointer;
+  color:#3a2168; font-weight:bold; box-shadow:0 0 12px var(--g);}
+.bigbtn{display:block; width:100%; margin-top:8px; padding:11px 0; border:0; border-radius:14px; cursor:pointer;
+  font-family:inherit; font-size:14px; color:#fff3c8; background:rgba(255,255,255,.16); border:1.5px solid #d4b3f7;}
+.bigbtn.gold{background:rgba(255,225,154,.3); border-color:#ffe19a;}
+
+.toast{position:fixed; left:50%; bottom:34px; transform:translateX(-50%) translateY(20px);
+  background:rgba(58,33,104,.95); color:#ffe9f7; border:2px solid #ffc8eb;
+  padding:10px 20px; border-radius:16px; font-size:15px; z-index:300;
+  opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; box-shadow:0 0 20px rgba(255,180,225,.4);}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+button:focus-visible, .cat:focus-visible, .candy:focus-visible{outline:3px solid #ffe19a; outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){ .aurora,.bokeh i,.stars i,.cat-stage,.aura::before,.aura::after,.orbit,.title .jc,.candy{animation:none !important;} }
+</style>
+</head>
+<body>
+<div class="aurora"></div>
+<div class="vignette"></div>
+<div class="stars" id="stars"></div>
+<div class="bokeh" id="bokeh"></div>
+
+<div class="game">
+  <div class="glints" id="glints"></div>
+
+  <div class="a2hs" id="a2hsBanner" role="button" tabindex="0">
+    <img src="apple-touch-icon.png" alt="喵喵糖果星图标">
+    <div class="a2txt">
+      <div class="a2t1">⭐ 把「喵喵糖果星」加到主屏</div>
+      <div class="a2t2">像 App 一样一点就玩 · 点这里看怎么加</div>
+    </div>
+    <button class="a2close" id="a2hsClose" aria-label="关闭横幅">✕</button>
+  </div>
+
+  <div class="topbar">
+    <div class="tb-left">
+      <button class="icon-btn set" id="setBtn" aria-label="设置">⚙</button>
+      <button class="icon-btn help" id="helpBtn" aria-label="帮助">?</button>
+      <button class="icon-btn lb" id="lbBtn" aria-label="排行榜">🏆</button>
+    </div>
+    <div class="chip score"><i class="sx">分数</i><span id="score">0</span></div>
+  </div>
+
+  <h1 class="title" id="title" data-text="喵喵糖果星"></h1>
+
+  <div class="board" id="board" aria-label="糖果棋盘"></div>
+
+  <div class="preview" id="preview"><div class="plabel">下一波 ↓</div></div>
+
+  <div class="energy" id="energyBar" title="星星能量：消除整排积攒，用来发动下面的工具">
+    <i class="estar">✦</i>
+    <div class="etrack"><div class="efill" id="energyFill"></div></div>
+    <span class="eval"><b id="energyVal">0</b>/200</span>
+  </div>
+
+  <div class="skills" id="skills">
+    <button class="skill off" data-c="take" data-cost="200" title="拿走马卡龙：把场上所有马卡龙（4格绿色那种）全部清除消失（消耗 200 能量）" style="--g:rgba(126,227,191,.8); background:linear-gradient(180deg,#bff0dc,#5fd9a8)">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+        <ellipse cx="11" cy="16" rx="7" ry="3.6" fill="#2ea86f"/>
+        <ellipse cx="11" cy="12" rx="7" ry="3.6" fill="#eafff6"/>
+        <ellipse cx="11" cy="11" rx="7" ry="3.6" fill="#7ee3bf"/>
+        <path d="M16.5 8.5 L21 4 M21 4 l-3.6 0 M21 4 l0 3.6" stroke="#1f7a4f" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="tx">拿走马卡龙</span><span class="cost">✦200</span></button>
+
+    <button class="skill off" data-c="m2g" data-cost="150" title="马卡龙变软糖：把场上每个马卡龙（4格）拆成 4 颗 1 格的小软糖，方便填行（消耗 150 能量）" style="--g:rgba(150,220,180,.8); background:linear-gradient(180deg,#bff0dc,#ffd24d)">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="6" cy="12" r="4.6" fill="#5fd9a8"/>
+        <path d="M11 12 h4 m-2.4 -2.4 l2.4 2.4 -2.4 2.4" stroke="#3a2168" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M19 7.5 C15.4 12 15.4 16 19 16 C22.6 16 22.6 12 19 7.5 Z" fill="#ffcf3d"/>
+      </svg>
+      <span class="tx">马卡龙变软糖</span><span class="cost">✦150</span></button>
+
+    <button class="skill off" data-c="gummy" data-cost="50" title="软糖填底排：在最底下那一行的空格里塞满小软糖，帮你把底行凑满消除（消耗 50 能量）" style="--g:rgba(255,217,102,.8); background:linear-gradient(180deg,#ffe9a8,#ffce3d)">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3 C7 10 7 15 12 15 C17 15 17 10 12 3 Z" fill="#ffb800"/>
+        <path d="M11 6 C9.5 8.5 9.5 11 11 11.5" stroke="#fff6d6" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <rect x="4" y="18" width="16" height="3" rx="1.5" fill="#7a5300" opacity=".55"/>
+      </svg>
+      <span class="tx">软糖填底排</span><span class="cost">✦50</span></button>
+
+    <button class="skill off" data-c="freeze" data-cost="100" title="冻结3回合：接下来 3 个回合顶部不再推入新糖果，给你时间慢慢消除（消耗 100 能量）" style="--g:rgba(150,200,255,.8); background:linear-gradient(180deg,#cfe4ff,#7fb8f5)">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" stroke="#1f5a9e" stroke-width="1.8" stroke-linecap="round">
+        <path d="M12 3 v18 M3.8 7.5 L20.2 16.5 M20.2 7.5 L3.8 16.5"/>
+        <path d="M12 6.5 l-2.2 2 M12 6.5 l2.2 2 M12 17.5 l-2.2 -2 M12 17.5 l2.2 -2"/>
+      </svg>
+      <span class="tx">冻结3回合</span><span class="cost">✦100</span></button>
+  </div>
+</div>
+
+<!-- 玩法说明（首次自动弹出 + 点 ? 打开） -->
+<div class="overlay" id="helpOverlay">
+  <div class="panel wide">
+    <h2>🍬 怎么玩</h2>
+    <div class="help-sec">
+      <b>目标：</b>拖动糖果左右移动，松手后它会掉到底部。<b>填满一整排</b>就会消除得分，别让糖果堆到最顶上～
+      <h3>🍭 糖果种类</h3>
+      • <b>软糖</b>（1格·黄）最灵活，用来补空<br>
+      • <b>旋旋糖</b>（2格·粉条纹）<br>
+      • <b>巧克力</b>（3格·棕方块）<br>
+      • <b>马卡龙</b>（4格·彩珠）最占地方
+      <h3>✦ 星星能量</h3>
+      每消除一排积攒能量，攒够就能发动下方 4 个<b>工具</b>帮你解围：
+      <br>• <b>拿走马卡龙</b> ✦200 — 清掉全场马卡龙<br>
+      • <b>马卡龙变软糖</b> ✦150 — 拆成小软糖好填行<br>
+      • <b>软糖填底排</b> ✦50 — 塞满最底排空格<br>
+      • <b>冻结3回合</b> ✦100 — 3 回合不出新糖
+    </div>
+    <button class="bigbtn gold" id="helpClose">开始玩 🐾</button>
+  </div>
+</div>
+
+<!-- 加入主屏教程 -->
+<div class="overlay" id="a2hsOverlay">
+  <div class="panel wide">
+    <h2>⭐ 加到主屏幕</h2>
+    <div class="tip">加到主屏后，像普通 App 一样点图标就能玩，全屏无地址栏～</div>
+    <div class="steps">
+      <div class="os">📱 iPhone / iPad（Safari）</div>
+      1. 点底部中间的「分享」按钮 <b>􀈂</b><br>
+      2. 在列表里选 <b>「添加到主屏幕」</b><br>
+      3. 右上角点 <b>「添加」</b> 完成
+      <div class="os">🤖 安卓（Chrome）</div>
+      1. 点右上角 <b>⋮</b> 菜单<br>
+      2. 选 <b>「添加到主屏幕 / 安装应用」</b><br>
+      3. 确认即可
+    </div>
+    <button class="bigbtn gold" id="a2hsTipClose">知道啦</button>
+  </div>
+</div>
+
+<!-- 设置 -->
+<div class="overlay" id="setOverlay">
+  <div class="panel">
+    <h2>⚙ 设置</h2>
+    <button class="bigbtn" id="soundToggle">🔊 音效：开</button>
+    <button class="bigbtn gold" id="setRestart">🔄 重新开局</button>
+    <button class="bigbtn" id="setClose">关闭</button>
+  </div>
+</div>
+
+<!-- 游戏结束 -->
+<div class="overlay" id="overOverlay">
+  <div class="panel">
+    <h2>🌠 糖果堆到星河尽头啦！</h2>
+    <div class="tip" id="overMsg"></div>
+    <button class="bigbtn gold" id="btnRescue">🐱 猫咪奇遇 · 清底三排续命</button>
+    <button class="bigbtn" id="btnLeaderboard" style="margin-top:8px">🏆 上榜 · 看排行榜</button>
+    <button class="bigbtn" id="btnRestart" style="margin-top:8px">重新开局</button>
+  </div>
+</div>
+
+<!-- 联网排行榜 -->
+<div class="overlay" id="lbOverlay">
+  <div class="panel wide">
+    <h2>🏆 排行榜</h2>
+    <div class="tip" id="lbScoreLine"></div>
+    <div id="lbEntry"></div>
+    <div id="lbList"><div class="lb-empty">加载中…</div></div>
+    <button class="bigbtn" id="lbClose">关闭</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const COLS=8, ROWS=11;
+// 格子尺寸按屏幕自适应，保证整页一屏放下
+function computeCell(){
+  const vw=Math.min(window.innerWidth||400,440);
+  const byW=Math.floor((vw-30)/COLS);
+  const b=document.getElementById('a2hsBanner');
+  const bh=(b && getComputedStyle(b).display!=='none') ? b.offsetHeight+8 : 0;  // 横幅占用的高度
+  const byH=Math.floor(((window.innerHeight||720)-235-bh)/(ROWS+1.2));
+  return Math.max(26, Math.min(44, Math.min(byW,byH)));
+}
+function relayout(){
+  CELL=computeCell();
+  document.documentElement.style.setProperty('--cell', CELL+'px');
+  if(typeof render==='function') render();
+}
+let CELL=computeCell();
+let soundOn=true;
+// 四种糖果，对应四种喵之力
+const KINDS={
+  gummy:   {len:1, type:'gummy',   c1:'#ffe9a8', c2:'#ffd24d', g:'rgba(255,217,102,.7)'},  // 软糖
+  swirl:   {len:2, type:'swirl',   c1:'#ff8fc4', c2:'#ffc1de', g:'rgba(255,143,196,.7)'},  // 旋旋糖
+  choco:   {len:3, type:'choco',                                g:'rgba(156,107,74,.6)'},  // 巧克力
+  macaron: {len:4, type:'macaron',                              g:'rgba(126,227,191,.7)'}, // 马卡龙
+};
+const MAC=['#ffc1de','#d6c4f8','#ffe9a8','#b3d6f9','#b3eed9'];
+const KEYS=Object.keys(KINDS);
+const $ = id => document.getElementById(id);
+
+// ---------- 魔幻音效（Web Audio 合成，无外部文件） ----------
+let AC=null;
+function ac(){
+  if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return null; } }
+  if(AC && AC.state==='suspended') AC.resume();
+  return AC;
+}
+function tone(freq,t0,dur,type,vol){
+  if(!soundOn) return;
+  const c=ac(); if(!c) return;
+  const o=c.createOscillator(), g=c.createGain();
+  o.type=type||'sine'; o.frequency.value=freq;
+  o.connect(g); g.connect(c.destination);
+  const t=c.currentTime+t0;
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(vol||0.18, t+0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  o.start(t); o.stop(t+dur+0.03);
+}
+const sMove =()=>{ tone(620,0,0.12,'triangle',0.13); tone(940,0.05,0.13,'sine',0.09); };           // 转移
+const sClear=()=>{ [784,988,1175,1568].forEach((f,i)=>tone(f,i*0.06,0.42,'sine',0.17)); tone(2349,0.2,0.5,'sine',0.07); }; // 消除·闪亮
+const sPower=()=>{ [523,659,784,1047,1319,1568].forEach((f,i)=>tone(f,i*0.05,0.5,'triangle',0.15)); };
+
+let cars=[], preview=[], nextId=1;
+let score=0, nitro=0;
+const NITRO_MAX=200;          // 能量上限
+let stall=0, busy=false, gameover=false, usedRescue=false, seed=12345;
+const PCOST={take:200, m2g:150, gummy:50, freeze:100};  // 各功能消耗的星星能量
+
+function rnd(){ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; }
+function ri(n){ return Math.floor(rnd()*n); }
+
+const board=$('board');
+const prev=$('preview');
+document.documentElement.style.setProperty('--cell', CELL+'px');
+document.documentElement.style.setProperty('--rows', ROWS);
+
+(function(){
+  const t=$('title'), txt=t.dataset.text;
+  [...txt].forEach((ch,i)=>{
+    const s=document.createElement('span');
+    s.className='jc'+(ch==='星'?' s':'');
+    s.textContent=ch; s.style.setProperty('--r',(i%2?4:-4)+'deg');
+    s.style.animationDelay=(i*0.12)+'s'; t.appendChild(s);
+  });
+})();
+
+// ---------- generation ----------
+const LENW={1:0.55, 2:2, 3:3, 4:2.8};   // 长度权重：1 格更少，3/4 更常出现
+function genRow(){
+  const gap=ri(COLS);
+  const out=[]; let c=0;
+  while(c<COLS){
+    if(c===gap){ c++; continue; }
+    if(rnd()<0.14){ c++; continue; }
+    let limit=COLS-c;
+    if(gap>c) limit=Math.min(limit,gap-c);
+    const fit=KEYS.filter(k=>KINDS[k].len<=limit);
+    if(fit.length===0){ c++; continue; }
+    let tot=0; for(const f of fit) tot+=LENW[KINDS[f].len];
+    let x=rnd()*tot, k=fit[fit.length-1];
+    for(const f of fit){ x-=LENW[KINDS[f].len]; if(x<=0){ k=f; break; } }
+    if(KINDS[k].len===1 && rnd()<0.55){ c++; continue; }   // 软糖太多→部分留空，增加难度
+    out.push({kind:k,col:c,len:KINDS[k].len});
+    c+=KINDS[k].len;
+  }
+  return out;
+}
+
+// ---------- grid helpers ----------
+function buildGrid(excludeId){
+  const g=Array.from({length:ROWS},()=>Array(COLS).fill(0));
+  for(const car of cars){ if(car.id===excludeId) continue;
+    for(let i=0;i<car.len;i++) g[car.row][car.col+i]=car.id; }
+  return g;
+}
+function gravity(){
+  let changed=true;
+  while(changed){
+    changed=false;
+    cars.sort((a,b)=>b.row-a.row);
+    for(const car of cars){
+      const g=buildGrid(car.id);
+      while(car.row<ROWS-1){
+        let ok=true;
+        for(let i=0;i<car.len;i++) if(g[car.row+1][car.col+i]){ok=false;break;}
+        if(!ok) break;
+        car.row++; changed=true;
+      }
+    }
+  }
+}
+function clearRows(){
+  let cleared=0, again=true;
+  while(again){
+    again=false;
+    const cnt=Array(ROWS).fill(0);
+    for(const car of cars) cnt[car.row]+=car.len;
+    for(let r=0;r<ROWS;r++){
+      if(cnt[r]===COLS){ cars=cars.filter(c=>c.row!==r); cleared++; again=true; gravity(); break; }
+    }
+  }
+  return cleared;
+}
+
+// ---------- turn flow ----------
+function spawn(){
+  if(stall>0){ stall--; toast('⧗ 时之结界生效，本回合不出糖 ('+stall+')'); return true; }
+  for(const car of cars) car.row--;
+  if(cars.some(c=>c.row<0)) return false;
+  for(const p of preview) cars.push({id:nextId++,kind:p.kind,len:p.len,row:ROWS-1,col:p.col,_enter:true});
+  preview=genRow();
+  return true;
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+function fullRowsNow(){
+  const cnt=Array(ROWS).fill(0);
+  for(const car of cars) cnt[car.row]+=car.len;
+  const rows=[]; for(let r=0;r<ROWS;r++) if(cnt[r]===COLS) rows.push(r);
+  return rows;
+}
+function applyRewards(c){
+  if(!c) return;
+  score+=5*c;
+  nitro=Math.min(NITRO_MAX, nitro+25*c);   // 消除积攒星星能量
+  toast('🎉 消除 '+c+' 排！+'+(5*c)+' 分，+'+(25*c)+' 能量');
+}
+async function resolveClears(){
+  let total=0;
+  while(true){
+    const rows=fullRowsNow();
+    if(!rows.length) break;
+    sClear();
+    const flashing=cars.filter(c=>rows.includes(c.row));
+    for(const c of flashing){ const el=elmap[c.id]; if(el) el.classList.add('flash'); }
+    await sleep(520);
+    cars=cars.filter(c=>!rows.includes(c.row));
+    total+=rows.length;
+    render();
+    gravity(); render();
+    await sleep(240);
+  }
+  return total;
+}
+
+async function endTurn(){
+  if(busy) return;
+  busy=true;
+  sMove();
+  gravity(); render(); await sleep(220);
+  applyRewards(await resolveClears());
+  const alive=spawn();
+  board.classList.add('pushing');
+  render(); await sleep(560);
+  board.classList.remove('pushing');
+  if(!alive){ render(); doGameOver(); busy=false; return; }
+  gravity(); render(); await sleep(240);
+  applyRewards(await resolveClears());
+  render();
+  busy=false;
+}
+
+// ---------- 功能（消耗星星能量） ----------
+async function usePower(kind){
+  if(busy||gameover) return;
+  const cost=PCOST[kind]||0;
+  if(nitro<cost){ toast('能量不足，需要 '+cost+' 能量'); return; }
+  busy=true; sPower(); nitro-=cost; render();
+  if(kind==='take'){
+    const n=cars.filter(c=>c.kind==='macaron').length;
+    cars=cars.filter(c=>c.kind!=='macaron'); toast('猫咪拿走 '+n+' 个马卡龙！');
+  } else if(kind==='m2g'){            // 马卡龙 → 软糖（每个拆成 len 颗软糖）
+    const news=[]; cars=cars.filter(c=>{
+      if(c.kind!=='macaron') return true;
+      for(let i=0;i<c.len;i++) news.push({id:nextId++,kind:'gummy',len:1,row:c.row,col:c.col+i});
+      return false;
+    }); cars.push(...news); toast('马卡龙变软糖！');
+  } else if(kind==='gummy'){          // 只填最后一行（底行）的空格
+    const g=buildGrid(0), r=ROWS-1;
+    for(let cc=0; cc<COLS; cc++) if(!g[r][cc]) cars.push({id:nextId++,kind:'gummy',len:1,row:r,col:cc});
+    toast('软糖填满最后一行！');
+  } else if(kind==='freeze'){         // 冻结：3 回合不出新糖
+    stall=3; board.classList.add('frost'); setTimeout(()=>board.classList.remove('frost'),900);
+    toast('❄ 冻结：3 回合不出新糖');
+  }
+  render(); await sleep(160);
+  gravity(); render(); await sleep(240);
+  applyRewards(await resolveClears());
+  render();
+  busy=false;
+}
+
+// ---------- render ----------
+const elmap={};
+function buildCandy(el, kind){
+  const K=KINDS[kind];
+  el.innerHTML='';
+  el.classList.add('t-'+K.type);
+  const w=K.len*CELL-6, h=CELL-12;
+  if(K.c1){ el.style.setProperty('--c1',K.c1); el.style.setProperty('--c2',K.c2); }
+  el.style.setProperty('--g', K.g);
+  if(K.type==='macaron'){
+    const n=Math.max(1, Math.round(w/(h-2)));
+    for(let i=0;i<n;i++){ const m=document.createElement('div'); m.className='mac';
+      const col=MAC[i%MAC.length];
+      m.style.background='radial-gradient(circle at 40% 32%, #fff, '+col+' 58%, '+col+')';
+      el.appendChild(m); }
+  }
+}
+function carEl(car){
+  let el=elmap[car.id], fresh=false;
+  if(!el){
+    fresh=true;
+    el=document.createElement('div');
+    board.appendChild(el);
+    elmap[car.id]=el;
+    attachDrag(el,car.id);
+  }
+  if(el.dataset.kind!==car.kind && !el.classList.contains('flash')){
+    el.className='candy';
+    buildCandy(el, car.kind);
+    el.dataset.kind=car.kind;
+  }
+  el.style.height=(CELL-12)+'px';
+  el.style.width=(car.len*CELL-6)+'px';
+  el.style.left=(car.col*CELL+3)+'px';
+  const target=(car.row*CELL+6);
+  if(fresh && car._enter){
+    el.style.top=((car.row+1.3)*CELL+6)+'px';
+    requestAnimationFrame(()=>{ el.style.top=target+'px'; });
+    delete car._enter;
+  } else {
+    el.style.top=target+'px';
+  }
+  return el;
+}
+function render(){
+  const seen=new Set();
+  for(const car of cars){ carEl(car); seen.add(car.id); }
+  for(const id in elmap){ if(!seen.has(+id)){ elmap[id].remove(); delete elmap[id]; } }
+  prev.querySelectorAll('.candy').forEach(e=>e.remove());
+  for(const p of preview){
+    const el=document.createElement('div');
+    el.className='candy ghost';
+    buildCandy(el, p.kind);
+    el.style.height=(CELL-12)+'px'; el.style.width=(p.len*CELL-6)+'px';
+    el.style.left=(p.col*CELL+3)+'px'; el.style.top='6px'; el.style.transition='none';
+    prev.appendChild(el);
+  }
+  $('score').textContent=score;
+  $('energyFill').style.width=(nitro/NITRO_MAX*100)+'%';
+  $('energyVal').textContent=nitro;
+  document.querySelectorAll('#skills .skill').forEach(b=>{
+    const cost=+b.dataset.cost;
+    b.classList.toggle('off', gameover || nitro<cost);
+  });
+}
+
+// ---------- drag ----------
+function horizRange(car){
+  const g=buildGrid(car.id);
+  let min=car.col; while(min>0 && !g[car.row][min-1]) min--;
+  let max=car.col; while(max+car.len<COLS && !g[car.row][max+car.len]) max++;
+  return {min,max};
+}
+let drag=null;
+function attachDrag(el,id){
+  el.addEventListener('pointerdown',e=>{
+    if(busy||gameover) return;
+    ac();
+    const car=cars.find(c=>c.id===id); if(!car) return;
+    const r=horizRange(car);
+    drag={id,startX:e.clientX,orig:car.col,min:r.min,max:r.max};
+    el.classList.add('dragging'); el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove',e=>{
+    if(!drag||drag.id!==id) return;
+    const car=cars.find(c=>c.id===id);
+    let dc=Math.round((e.clientX-drag.startX)/CELL);
+    car.col=Math.max(drag.min,Math.min(drag.max,drag.orig+dc));
+    el.style.left=(car.col*CELL+3)+'px';
+  });
+  const up=e=>{
+    if(!drag||drag.id!==id) return;
+    el.classList.remove('dragging');
+    const car=cars.find(c=>c.id===id);
+    const moved=car && car.col!==drag.orig;
+    drag=null;
+    if(moved) endTurn(); else render();
+  };
+  el.addEventListener('pointerup',up);
+  el.addEventListener('pointercancel',up);
+}
+
+// ---------- game over ----------
+function doGameOver(){
+  gameover=true;
+  $('overMsg').textContent='最终得分 '+score+' 分！';
+  $('btnRescue').style.display=usedRescue?'none':'block';
+  $('overOverlay').classList.add('show');
+}
+function rescue(){
+  usedRescue=true;
+  cars=cars.filter(c=>c.row<ROWS-3);
+  gravity(); render(); gameover=false;
+  $('overOverlay').classList.remove('show');
+  toast('🐱 猫咪帮你清掉了底部三排！');
+}
+
+// ---------- toast / fx ----------
+let tTimer;
+function toast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(tTimer); tTimer=setTimeout(()=>t.classList.remove('show'),1500);
+}
+function pop(el){ el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),420); }
+function burst(el, n){
+  const br=board.getBoundingClientRect(), er=el.getBoundingClientRect();
+  const cx=er.left-br.left+er.width/2, cy=er.top-br.top+er.height/2;
+  const glyphs=['✦','✧','♡','✶','•'];
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div'); s.className='spark'; s.textContent=glyphs[i%glyphs.length];
+    s.style.left=cx+'px'; s.style.top=cy+'px';
+    const a=Math.random()*Math.PI*2, d=22+Math.random()*30;
+    s.style.setProperty('--dx',Math.cos(a)*d+'px'); s.style.setProperty('--dy',Math.sin(a)*d+'px');
+    board.appendChild(s); setTimeout(()=>s.remove(),720);
+  }
+}
+function heart(el){
+  const r=el.getBoundingClientRect();
+  for(let i=0;i<5;i++){
+    const s=document.createElement('div'); s.className='trail'; s.textContent=i%2?'♡':'✦';
+    s.style.left=(r.left+r.width/2+(Math.random()*40-20))+'px';
+    s.style.top=(r.top+r.height/2)+'px';
+    document.body.appendChild(s); setTimeout(()=>s.remove(),700);
+  }
+}
+
+// ---------- 联网排行榜（Supabase） ----------
+// anonKey 是「公开」key，可放前端，安全靠数据库 RLS 策略与下方校验兜底。
+const SUPA={ url:'https://gucophydteoupaxqwasj.supabase.co', anonKey:'sb_publishable_Nd1P_w7n8HaIKj762RDh2A_N_sQ41NI' };
+const LB_TABLE='candy_scores', LB_SIZE=20, NAME_MAX=12;
+// 前端兜底违禁词（非穷举，正式上线建议配合服务端内容安全）
+const BADWORDS=[
+  'fuck','shit','bitch','cunt','asshole','dick','pussy','bastard','nigger','faggot','whore','slut','rape','nazi','hitler',
+  '傻逼','傻屄','煞笔','操你','草你','草泥马','卧槽','妈的','你妈','狗娘','贱人','婊子','鸡巴','滚蛋','死全家','弱智','智障','脑残','屌丝',
+  '法轮功','六四','台独','港独','藏独','反共'
+];
+function sbH(extra){ return Object.assign({apikey:SUPA.anonKey, Authorization:'Bearer '+SUPA.anonKey, 'Content-Type':'application/json'}, extra||{}); }
+async function lbTop(){
+  const u=`${SUPA.url}/rest/v1/${LB_TABLE}?select=name,score&order=score.desc,created_at.asc&limit=${LB_SIZE}`;
+  const r=await fetch(u,{headers:sbH()}); if(!r.ok) throw new Error('GET '+r.status); return r.json();
+}
+async function lbAdd(name,sc){
+  const r=await fetch(`${SUPA.url}/rest/v1/${LB_TABLE}`,{method:'POST',headers:sbH({Prefer:'return=minimal'}),body:JSON.stringify({name,score:sc})});
+  if(!r.ok) throw new Error('POST '+r.status);
+}
+function validateName(raw){
+  const name=(raw||'').trim();
+  if(!name) return {ok:false,msg:'请输入名字'};
+  if([...name].length>NAME_MAX) return {ok:false,msg:'名字最多 '+NAME_MAX+' 个字'};
+  if(!/^[一-龥a-zA-Z0-9 _\-·.]+$/.test(name)) return {ok:false,msg:'含有不支持的字符'};
+  const norm=name.toLowerCase().replace(/\s+/g,'');
+  for(const w of BADWORDS) if(norm.includes(w)) return {ok:false,msg:'名字含违禁词，请换一个'};
+  return {ok:true,name};
+}
+function esc(s){ return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function lbListHTML(list, hl){
+  if(!list||!list.length) return '<div class="lb-empty">还没有记录，争取第一个上榜！</div>';
+  const medal=i=> i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+  let h='<ol class="lb-board">', done=false;
+  list.forEach((e,i)=>{
+    const me=hl&&!done&&e.name===hl.name&&e.score===hl.score; if(me)done=true;
+    h+='<li class="'+(me?'me':'')+'"><span class="rk">'+medal(i)+'</span><span class="nm">'+esc(e.name)+'</span><span class="sc">'+e.score+'</span></li>';
+  });
+  return h+'</ol>';
+}
+let lbSubmitted=false, lbLast=null;
+async function openLeaderboard(submit){
+  $('lbOverlay').classList.add('show');
+  const line=$('lbScoreLine'), entry=$('lbEntry'), listEl=$('lbList');
+  line.textContent = submit ? ('本局得分 '+score+' 分') : '';
+  if(submit && score>0 && !lbSubmitted){
+    entry.innerHTML='<input id="lbName" maxlength="'+NAME_MAX+'" placeholder="输入名字（最多 '+NAME_MAX+' 字）" autocomplete="off">'
+      +'<div id="lbErr" class="ov-err"></div>'
+      +'<button id="lbSave" class="bigbtn gold">保存成绩</button>';
+    const inp=$('lbName'); inp.focus();
+    $('lbSave').onclick=()=>submitScore(inp.value);
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); submitScore(inp.value); } });
+    inp.addEventListener('input',()=>{ const er=$('lbErr'); if(er)er.textContent=''; });
+  } else { entry.innerHTML=''; }
+  listEl.innerHTML='<div class="lb-empty">加载中…</div>';
+  try{ const top=await lbTop(); listEl.innerHTML=lbListHTML(top, lbSubmitted?lbLast:null); }
+  catch(e){ listEl.innerHTML='<div class="lb-empty">😿 联网失败，请检查网络后重试</div>'; }
+}
+async function submitScore(raw){
+  const v=validateName(raw); const er=$('lbErr');
+  if(!v.ok){ if(er)er.textContent=v.msg; return; }
+  const btn=$('lbSave'); if(btn){ btn.disabled=true; btn.textContent='保存中…'; }
+  try{
+    await lbAdd(v.name, score);
+    lbSubmitted=true; lbLast={name:v.name, score};
+    $('lbEntry').innerHTML='';
+    const top=await lbTop(); $('lbList').innerHTML=lbListHTML(top, lbLast);
+    toast('🎉 成绩已上榜！');
+  }catch(e){
+    if(er)er.textContent='联网保存失败，请重试';
+    if(btn){ btn.disabled=false; btn.textContent='保存成绩'; }
+  }
+}
+$('lbBtn').addEventListener('click', ()=>{ pop($('lbBtn')); openLeaderboard(false); });
+$('lbClose').onclick=()=>$('lbOverlay').classList.remove('show');
+$('btnLeaderboard').onclick=()=>{ $('overOverlay').classList.remove('show'); openLeaderboard(true); };
+
+// ---------- ui wiring ----------
+document.querySelectorAll('[data-toast]').forEach(b=>
+  b.addEventListener('click', ()=>{ pop(b); toast(b.dataset.toast); }));
+
+// 底部 5 个功能：消耗分数发动
+document.querySelectorAll('#skills .skill').forEach(b=>{
+  b.addEventListener('click', ()=>{ ac(); usePower(b.dataset.c); });
+});
+$('btnRescue').onclick=rescue;
+$('btnRestart').onclick=()=>location.reload();
+
+// 设置弹窗
+$('setBtn').addEventListener('click', ()=>{ pop($('setBtn')); $('setOverlay').classList.add('show'); });
+$('setClose').onclick=()=>$('setOverlay').classList.remove('show');
+$('setRestart').onclick=()=>location.reload();
+$('soundToggle').onclick=()=>{
+  soundOn=!soundOn;
+  $('soundToggle').textContent=(soundOn?'🔊 音效：开':'🔇 音效：关');
+  if(soundOn){ ac(); sMove(); }
+};
+
+// 玩法说明弹窗
+function openHelp(){ $('helpOverlay').classList.add('show'); }
+$('helpBtn').addEventListener('click', ()=>{ pop($('helpBtn')); openHelp(); });
+$('helpClose').onclick=()=>$('helpOverlay').classList.remove('show');
+
+// 本地存储小工具（隐私模式下可能抛错，包一层）
+const store={
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+};
+
+// 加入主屏：横幅 + 教程
+const inStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+const banner=$('a2hsBanner');
+if(inStandalone || store.get('mmcs_a2hs_off')==='1'){ banner.classList.add('hide'); }
+banner.addEventListener('click', ()=>$('a2hsOverlay').classList.add('show'));
+$('a2hsClose').addEventListener('click', e=>{
+  e.stopPropagation(); banner.classList.add('hide'); store.set('mmcs_a2hs_off','1');
+  relayout();   // 横幅消失后棋盘长回来
+});
+$('a2hsTipClose').onclick=()=>$('a2hsOverlay').classList.remove('show');
+
+// 首次进入：自动弹出玩法说明（可直接关闭，之后不再自动弹）
+if(store.get('mmcs_seen')!=='1'){ openHelp(); store.set('mmcs_seen','1'); }
+
+// 窗口变化自动重算格子尺寸（保留当前局面）
+let rzTimer;
+window.addEventListener('resize', ()=>{
+  clearTimeout(rzTimer);
+  rzTimer=setTimeout(()=>{
+    CELL=computeCell();
+    document.documentElement.style.setProperty('--cell', CELL+'px');
+    render();
+  }, 150);
+});
+
+// ---------- 背景装饰 ----------
+(function(){
+  const sw=$('stars');
+  for(let i=0;i<60;i++){ const s=document.createElement('i');
+    s.textContent=Math.random()<.3?'✦':'·';
+    s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%';
+    s.style.fontSize=(8+Math.random()*12)+'px'; s.style.animationDelay=(Math.random()*3.2)+'s'; sw.appendChild(s); }
+  const gw=$('glints'); const gl=['✦','✧','♡'];
+  for(let i=0;i<6;i++){ const g=document.createElement('i'); g.textContent=gl[i%3];
+    g.style.left=(8+Math.random()*84)+'%'; g.style.top=(4+Math.random()*30)+'%';
+    g.style.fontSize=(9+Math.random()*5)+'px'; g.style.animationDelay=(Math.random()*4)+'s'; gw.appendChild(g); }
+  const bk=$('bokeh');
+  for(let i=0;i<8;i++){ const b=document.createElement('i'); const sz=10+Math.random()*26;
+    b.style.width=sz+'px'; b.style.height=sz+'px'; b.style.left=Math.random()*100+'%';
+    b.style.animationDuration=(11+Math.random()*9)+'s'; b.style.animationDelay=(Math.random()*12)+'s'; bk.appendChild(b); }
+})();
+let lastTrail=0;
+window.addEventListener('pointermove', e=>{
+  const now=Date.now(); if(now-lastTrail<70) return; lastTrail=now;
+  if(Math.random()>0.6) return;
+  const s=document.createElement('div'); s.className='trail'; s.textContent=Math.random()<.4?'✧':'·';
+  s.style.left=e.clientX+'px'; s.style.top=e.clientY+'px'; s.style.fontSize=(9+Math.random()*6)+'px';
+  document.body.appendChild(s); setTimeout(()=>s.remove(),700);
+}, {passive:true});
+function shootingStar(){
+  const s=document.createElement('div'); s.className='shoot';
+  s.style.left=(Math.random()*60)+'%'; s.style.top=(Math.random()*40)+'%';
+  document.body.appendChild(s); setTimeout(()=>s.remove(),1200);
+  setTimeout(shootingStar, 6000+Math.random()*8000);
+}
+setTimeout(shootingStar, 3500);
+
+// ---------- init ----------
+function drawLanes(){
+  for(let c=1;c<COLS;c++){
+    const ln=document.createElement('div');
+    ln.className='lane'+(c===COLS/2?' center':'');
+    ln.style.left=(c*CELL)+'px';
+    board.appendChild(ln);
+  }
+}
+function init(){
+  preview=genRow();
+  for(let i=0;i<4;i++){ spawn(); }
+  gravity(); clearRows(); render();
+}
+init();
+relayout();                                   // 按横幅最终显隐校正棋盘尺寸
+window.addEventListener('load', relayout);    // 字体加载完再校正一次
+</script>
+</body>
+</html>
