@@ -257,12 +257,13 @@ body{
 .tool.ready .orb{animation:readyglow 1.3s ease-in-out infinite;}
 @keyframes readyglow{0%,100%{box-shadow:0 0 16px rgba(255,143,196,.6);}50%{box-shadow:0 0 26px 6px rgba(255,143,196,.95);}}
 
-/* 加入主屏横幅（文档流顶端，在顶栏之上） */
-.a2hs{display:flex; align-items:center; gap:9px; cursor:pointer; box-sizing:border-box;
-  margin:0 0 8px; padding:8px 12px; border-radius:14px;
-  background:linear-gradient(90deg,rgba(255,209,77,.20),rgba(255,143,196,.20));
-  border:1.5px dashed #ffd66e; box-shadow:0 0 14px rgba(255,200,120,.22);
-  animation:a2hsPulse 2.4s ease-in-out infinite;}
+/* 加入主屏横幅（悬浮，不占布局高度，浮在顶栏下方/棋盘顶部） */
+.a2hs{position:absolute; left:0; right:0; top:84px; z-index:60;
+  display:flex; align-items:center; gap:9px; cursor:pointer; box-sizing:border-box;
+  padding:8px 12px; border-radius:14px;
+  background:linear-gradient(90deg,rgba(120,72,172,.94),rgba(150,92,182,.94));
+  border:1.5px dashed #ffd66e; box-shadow:0 6px 18px rgba(20,8,40,.42), 0 0 14px rgba(255,200,120,.25);
+  backdrop-filter:blur(3px); animation:a2hsPulse 2.4s ease-in-out infinite;}
 .a2hs.hide{display:none;}
 @keyframes a2hsPulse{0%,100%{box-shadow:0 0 10px rgba(255,200,120,.2);}50%{box-shadow:0 0 18px rgba(255,200,120,.45);}}
 .a2hs img{width:32px; height:32px; border-radius:8px; flex:0 0 auto; box-shadow:0 0 0 1.5px rgba(255,255,255,.35);}
@@ -469,19 +470,24 @@ button:focus-visible, .cat:focus-visible, .candy:focus-visible{outline:3px solid
 
 <script>
 const COLS=8, ROWS=11;
-// 格子尺寸按屏幕自适应，保证整页一屏放下
+// 格子尺寸按屏幕自适应：宽度优先填满，整页一屏放下（横幅悬浮，不计入高度）
 function computeCell(){
-  const vw=Math.min(window.innerWidth||400,440);
-  const byW=Math.floor((vw-30)/COLS);
-  const b=document.getElementById('a2hsBanner');
-  const bh=(b && getComputedStyle(b).display!=='none') ? b.offsetHeight+8 : 0;  // 横幅占用的高度
-  const byH=Math.floor(((window.innerHeight||720)-235-bh)/(ROWS+1.2));
-  return Math.max(26, Math.min(44, Math.min(byW,byH)));
+  const vw=Math.min(window.innerWidth||400,520);
+  const byW=Math.floor((vw-28)/COLS);                                  // 横向填满（仅留 body 两侧内边距）
+  const byH=Math.floor(((window.innerHeight||720)-225)/(ROWS+1.2));    // 纵向一屏放下
+  return Math.max(26, Math.min(58, Math.min(byW,byH)));
+}
+// 把悬浮横幅定位到顶栏正下方（不占布局高度）
+function placeBanner(){
+  const b=document.getElementById('a2hsBanner'), tb=document.querySelector('.topbar');
+  if(!b||!tb) return;
+  b.style.top=(tb.offsetTop+tb.offsetHeight+6)+'px';
 }
 function relayout(){
   CELL=computeCell();
   document.documentElement.style.setProperty('--cell', CELL+'px');
   if(typeof render==='function') render();
+  placeBanner();
 }
 let CELL=computeCell();
 let soundOn=true;
