@@ -29,7 +29,7 @@ var _hmt = _hmt || [];
 :root{
   --pink:#ff8fc4; --lav:#b89cf0; --sky:#7fb8f5; --mint:#7ee3bf; --lemon:#ffd966;
   --gold:#ffe19a; --cream:#fff3c8;
-  --cell:38px; --cols:8; --rows:11;
+  --cell:38px; --cols:9; --rows:11;
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;
   -webkit-user-select:none; -moz-user-select:none; user-select:none; -webkit-touch-callout:none;}
@@ -431,7 +431,7 @@ button:focus-visible, .candy:focus-visible{outline:3px solid #ffe19a; outline-of
 <div class="toast" id="toast"></div>
 
 <script>
-const COLS=8, ROWS=11;
+const COLS=9, ROWS=11;
 // 格子尺寸按屏幕自适应：宽度优先填满，整页一屏放下（横幅悬浮，不计入高度）
 function computeCell(){
   const vw=Math.min(window.innerWidth||400,520);
@@ -1008,7 +1008,7 @@ setTimeout(shootingStar, 3500);
 function drawLanes(){
   for(let c=1;c<COLS;c++){
     const ln=document.createElement('div');
-    ln.className='lane'+(c===COLS/2?' center':'');
+    ln.className='lane'+(c===Math.round(COLS/2)?' center':'');
     ln.style.left=(c*CELL)+'px';
     board.appendChild(ln);
   }
