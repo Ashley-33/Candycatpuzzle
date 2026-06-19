@@ -275,6 +275,14 @@ body{
   padding:20px; width:300px; text-align:center; color:#ffe9f7; box-shadow:0 0 40px rgba(255,180,225,.4);}
 .panel h2{margin:0 0 6px; color:#ffcf6e; text-shadow:0 1px 2px rgba(35,12,60,.5);}
 .panel .tip{font-size:12px; color:#d8c4f0; margin-bottom:6px;}
+/* 难度选择（设置）+ 排行榜难度 tab：共用分段按钮样式 */
+.set-label{text-align:left; font-size:12.5px; color:#ffe08a; margin:6px 2px 4px;}
+.diffseg,.lbtabs{display:flex; gap:6px; margin:0 0 8px;}
+.diffseg button,.lbtabs button{flex:1; padding:8px 0; border:1.5px solid #8c6bbf; border-radius:11px;
+  background:rgba(255,255,255,.08); color:#e7d4ff; font-family:inherit; font-size:13px; cursor:pointer; transition:.15s;}
+.diffseg button.active,.lbtabs button.active{background:linear-gradient(180deg,#ffd86b,#ffb43d); color:#5a3210; border-color:#ffe08a; font-weight:700; box-shadow:0 0 12px rgba(255,200,120,.5);}
+.set-note{text-align:left; font-size:11px; color:#c9b6ec; line-height:1.5; margin:2px 2px 10px;}
+.set-note b{color:#ffe08a;}
 .pick{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:12px 0;}
 .pick button{padding:11px 6px; border-radius:13px; border:0; font-family:inherit; font-size:13px; cursor:pointer;
   color:#3a2168; font-weight:bold; box-shadow:0 0 12px var(--g);}
@@ -411,6 +419,13 @@ button:focus-visible, .candy:focus-visible{outline:3px solid #ffe19a; outline-of
 <div class="overlay" id="setOverlay">
   <div class="panel">
     <h2>⚙ 设置</h2>
+    <div class="set-label">难度</div>
+    <div class="diffseg" id="diffSeg">
+      <button data-diff="easy">简单</button>
+      <button data-diff="normal">普通</button>
+      <button data-diff="hard">困难</button>
+    </div>
+    <div class="set-note">难度只影响「⚡能量收集速度」——简单攒得快、困难攒得慢，<b>不影响分数</b>。排行榜按难度分别排名。</div>
     <button class="bigbtn" id="soundToggle">🔊 音效：开</button>
     <button class="bigbtn gold" id="setRestart">🔄 重新开局</button>
     <button class="bigbtn" id="setClose">关闭</button>
@@ -421,6 +436,11 @@ button:focus-visible, .candy:focus-visible{outline:3px solid #ffe19a; outline-of
 <div class="overlay" id="lbOverlay">
   <div class="panel wide">
     <h2 id="lbTitle">🏆 排行榜</h2>
+    <div class="lbtabs" id="lbTabs">
+      <button data-diff="easy">简单</button>
+      <button data-diff="normal">普通</button>
+      <button data-diff="hard">困难</button>
+    </div>
     <div class="tip" id="lbScoreLine"></div>
     <div id="lbEntry"></div>
     <div id="lbList"><div class="lb-empty">加载中…</div></div>
@@ -453,6 +473,11 @@ function relayout(){
 }
 let CELL=computeCell();
 let soundOn=true;
+// 难度：只影响「能量收集速度」，不影响分数。简单攒得快、困难攒得慢
+const ENERGY_PER_ROW={easy:15, normal:10, hard:5};
+const DIFF_LABEL={easy:'简单', normal:'普通', hard:'困难'};
+const DIFFS=['easy','normal','hard'];
+let difficulty='normal';   // 启动后从本地存储读取
 // 四种糖果，对应四种喵之力
 const KINDS={
   gummy:   {len:1, type:'gummy',   c1:'#ffcf3a', c2:'#f59e00', g:'rgba(255,190,60,.65)'},   // 软糖（金黄）
@@ -591,9 +616,10 @@ function fullRowsNow(){
 }
 function applyRewards(c){
   if(!c) return;
+  const ePer=ENERGY_PER_ROW[difficulty]||10;
   score+=5*c;
-  nitro=Math.min(NITRO_MAX, nitro+10*c);   // 消除积攒星星能量
-  toast('🎉 消除 '+c+' 排！+'+(5*c)+' 分，+'+(10*c)+' 能量');
+  nitro=Math.min(NITRO_MAX, nitro+ePer*c);   // 消除积攒星星能量（随难度）
+  toast('🎉 消除 '+c+' 排！+'+(5*c)+' 分，+'+(ePer*c)+' 能量');
 }
 async function resolveClears(){
   let total=0;
@@ -829,12 +855,12 @@ const BADWORDS=[
   '法轮功','六四','台独','港独','藏独','反共'
 ];
 function sbH(extra){ return Object.assign({apikey:SUPA.anonKey, Authorization:'Bearer '+SUPA.anonKey, 'Content-Type':'application/json'}, extra||{}); }
-async function lbTop(){
-  const u=`${SUPA.url}/rest/v1/${LB_TABLE}?select=name,score&order=score.desc,created_at.asc&limit=${LB_SIZE}`;
+async function lbTop(diff){
+  const u=`${SUPA.url}/rest/v1/${LB_TABLE}?select=name,score&difficulty=eq.${diff}&order=score.desc,created_at.asc&limit=${LB_SIZE}`;
   const r=await fetch(u,{headers:sbH()}); if(!r.ok) throw new Error('GET '+r.status); return r.json();
 }
-async function lbAdd(name,sc){
-  const r=await fetch(`${SUPA.url}/rest/v1/${LB_TABLE}`,{method:'POST',headers:sbH({Prefer:'return=minimal'}),body:JSON.stringify({name,score:sc})});
+async function lbAdd(name,sc,diff){
+  const r=await fetch(`${SUPA.url}/rest/v1/${LB_TABLE}`,{method:'POST',headers:sbH({Prefer:'return=minimal'}),body:JSON.stringify({name,score:sc,difficulty:diff})});
   if(!r.ok) throw new Error('POST '+r.status);
 }
 function validateName(raw){
@@ -857,36 +883,36 @@ function lbListHTML(list, hl){
   });
   return h+'</ol>';
 }
-let lbSubmitted=false, lbLast=null;
+let lbSubmitted=false, lbLast=null, lbViewDiff='normal', lbGameOver=false;
 function lbQualifies(list){           // 是否能进前十
   if(score<=0) return false;
   if(list.length < LB_SIZE) return true;
   return score > list[list.length-1].score;
 }
 const LB_TIMEOUT=8000;   // 排行榜加载超时（毫秒）：超过就提示无法获取
-async function openLeaderboard(fromGameOver){
-  $('lbOverlay').classList.add('show');
-  const title=$('lbTitle'), line=$('lbScoreLine'), entry=$('lbEntry'), listEl=$('lbList'), btn=$('lbClose');
-  title.textContent = fromGameOver ? '🌠 本局结束' : '🏆 排行榜 · 前十';
-  line.textContent = fromGameOver ? ('本局得分 '+score+' 分') : '';
+function renderLbTabs(){
+  [...$('lbTabs').children].forEach(b=> b.classList.toggle('active', b.dataset.diff===lbViewDiff));
+}
+function lbBtnRestart(){ const b=$('lbClose'); b.style.display='block'; b.textContent='🔄 重新开始'; b.classList.add('gold'); b.onclick=restartGame; }
+function lbBtnClose(){ const b=$('lbClose'); b.style.display='block'; b.textContent='关闭'; b.classList.remove('gold'); b.onclick=()=>$('lbOverlay').classList.remove('show'); }
+// 加载并渲染「当前所选 tab(lbViewDiff)」的榜单
+async function loadLbTab(){
+  const line=$('lbScoreLine'), entry=$('lbEntry'), listEl=$('lbList');
+  renderLbTabs();
   entry.innerHTML='';
   listEl.innerHTML='<div class="lb-empty">榜单加载中…</div>';
-  const showRestart=()=>{ btn.style.display='block'; btn.textContent='🔄 重新开始'; btn.classList.add('gold'); btn.onclick=restartGame; };
-  const showClose=()=>{ btn.style.display='block'; btn.textContent='关闭'; btn.classList.remove('gold'); btn.onclick=()=>$('lbOverlay').classList.remove('show'); };
-  // 结算时：等榜单加载好/超时再显示「重新开始」；浏览时：随时可关闭
-  if(fromGameOver){ btn.style.display='none'; } else { showClose(); }
+  if(lbGameOver) $('lbClose').style.display='none';   // 结算时等加载好再出现「重新开始」
   let top=null, failed=false;
-  try{
-    top=await Promise.race([ lbTop(), new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), LB_TIMEOUT)) ]);
-  }catch(e){ failed=true; }
+  try{ top=await Promise.race([ lbTop(lbViewDiff), new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), LB_TIMEOUT)) ]); }
+  catch(e){ failed=true; }
   if(failed){
     listEl.innerHTML='<div class="lb-empty">😿 暂时无法获取排行榜，请检查网络</div>';
-    if(fromGameOver) showRestart();
+    if(lbGameOver) lbBtnRestart();
     return;
   }
-  // 能上榜（前十）→ 提示输入名字；否则直接显示榜单
-  if(fromGameOver && !lbSubmitted && lbQualifies(top)){
-    line.textContent='🎉 冲进前十！留名上榜：';
+  // 仅在「本局难度」对应的 tab 上、且能进前十时，才提示留名
+  if(lbGameOver && lbViewDiff===difficulty && !lbSubmitted && lbQualifies(top)){
+    line.textContent='🎉 冲进'+DIFF_LABEL[difficulty]+'·前十！留名上榜：';
     entry.innerHTML='<input id="lbName" maxlength="'+NAME_MAX+'" placeholder="输入名字（最多 '+NAME_MAX+' 字）" autocomplete="off">'
       +'<div id="lbErr" class="ov-err"></div>'
       +'<button id="lbSave" class="bigbtn gold">保存成绩</button>';
@@ -894,25 +920,37 @@ async function openLeaderboard(fromGameOver){
     $('lbSave').onclick=()=>submitScore(inp.value);
     inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); submitScore(inp.value); } });
     inp.addEventListener('input',()=>{ const er=$('lbErr'); if(er)er.textContent=''; });
+  } else if(lbGameOver){
+    line.textContent='本局得分 '+score+' 分（'+DIFF_LABEL[difficulty]+'）';
   }
-  listEl.innerHTML=lbListHTML(top, lbSubmitted?lbLast:null);
-  if(fromGameOver) showRestart();   // 榜单出来后再显示重新开始
+  listEl.innerHTML=lbListHTML(top, (lbSubmitted && lbViewDiff===difficulty)?lbLast:null);
+  if(lbGameOver) lbBtnRestart();
+}
+async function openLeaderboard(fromGameOver){
+  lbGameOver=!!fromGameOver;
+  $('lbOverlay').classList.add('show');
+  $('lbTitle').textContent = fromGameOver ? '🌠 本局结束' : '🏆 排行榜 · 前十';
+  $('lbScoreLine').textContent = fromGameOver ? ('本局得分 '+score+' 分（'+DIFF_LABEL[difficulty]+'）') : '';
+  lbViewDiff = fromGameOver ? difficulty : (lbViewDiff||difficulty);   // 结算默认停在本局难度 tab
+  if(!fromGameOver) lbBtnClose();
+  await loadLbTab();
 }
 async function submitScore(raw){
   const v=validateName(raw); const er=$('lbErr');
   if(!v.ok){ if(er)er.textContent=v.msg; return; }
   const btn=$('lbSave'); if(btn){ btn.disabled=true; btn.textContent='保存中…'; }
   try{
-    await lbAdd(v.name, score);
+    await lbAdd(v.name, score, difficulty);
     lbSubmitted=true; lbLast={name:v.name, score};
     $('lbEntry').innerHTML='';
-    const top=await lbTop(); $('lbList').innerHTML=lbListHTML(top, lbLast);
+    const top=await lbTop(difficulty); $('lbList').innerHTML=lbListHTML(top, lbLast);
     toast('🎉 成绩已上榜！');
   }catch(e){
     if(er)er.textContent='联网保存失败，请重试';
     if(btn){ btn.disabled=false; btn.textContent='保存成绩'; }
   }
 }
+$('lbTabs').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b)return; lbViewDiff=b.dataset.diff; loadLbTab(); });
 $('lbBtn').addEventListener('click', ()=>{ pop($('lbBtn')); openLeaderboard(false); });
 
 // ---------- ui wiring ----------
@@ -944,6 +982,16 @@ const store={
   get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
   set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
 };
+
+// 难度设置：读取存储 + 渲染选中态 + 切换（只改能量收集速度，立即生效）
+difficulty = DIFFS.includes(store.get('mmcs_diff')) ? store.get('mmcs_diff') : 'normal';
+function renderDiffSeg(){ [...$('diffSeg').children].forEach(b=> b.classList.toggle('active', b.dataset.diff===difficulty)); }
+renderDiffSeg();
+$('diffSeg').addEventListener('click', e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  difficulty=b.dataset.diff; store.set('mmcs_diff', difficulty); renderDiffSeg(); render();
+  toast(DIFF_LABEL[difficulty]+'难度：每消一排 +'+ENERGY_PER_ROW[difficulty]+' 能量');
+});
 
 // 加入主屏：横幅 + 教程
 const inStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
