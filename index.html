@@ -546,13 +546,19 @@ document.documentElement.style.setProperty('--rows', ROWS);
 })();
 
 // ---------- generation ----------
-const LENW={1:0.55, 2:2, 3:3, 4:2.8};   // 长度权重：1 格更少，3/4 更常出现
+// 出块长度权重：普通/困难用 NORMAL；简单多小块(1/2格)、少马卡龙(4格)，更好填行
+const LENW_NORMAL={1:0.55, 2:2, 3:3, 4:2.8};
+const LENW_EASY={1:1.4, 2:2.4, 3:1.4, 4:0.7};
 function genRow(){
+  const easy=(difficulty==='easy');
+  const LENW=easy?LENW_EASY:LENW_NORMAL;
+  const skipP=easy?0.06:0.14;     // 随机留空概率（简单更少空洞）
+  const gap1P=easy?0.2:0.55;      // 1格软糖再留空概率（简单更少留空）
   const gap=ri(COLS);
   const out=[]; let c=0;
   while(c<COLS){
     if(c===gap){ c++; continue; }
-    if(rnd()<0.14){ c++; continue; }
+    if(rnd()<skipP){ c++; continue; }
     let limit=COLS-c;
     if(gap>c) limit=Math.min(limit,gap-c);
     const fit=KEYS.filter(k=>KINDS[k].len<=limit);
@@ -560,7 +566,7 @@ function genRow(){
     let tot=0; for(const f of fit) tot+=LENW[KINDS[f].len];
     let x=rnd()*tot, k=fit[fit.length-1];
     for(const f of fit){ x-=LENW[KINDS[f].len]; if(x<=0){ k=f; break; } }
-    if(KINDS[k].len===1 && rnd()<0.55){ c++; continue; }   // 软糖太多→部分留空，增加难度
+    if(KINDS[k].len===1 && rnd()<gap1P){ c++; continue; }   // 软糖部分留空
     out.push({kind:k,col:c,len:KINDS[k].len});
     c+=KINDS[k].len;
   }
