@@ -995,8 +995,13 @@ function renderDiffSeg(){ [...$('diffSeg').children].forEach(b=> b.classList.tog
 renderDiffSeg();
 $('diffSeg').addEventListener('click', e=>{
   const b=e.target.closest('button'); if(!b) return;
-  difficulty=b.dataset.diff; store.set('mmcs_diff', difficulty); renderDiffSeg(); render();
-  toast(DIFF_LABEL[difficulty]+'难度：每消一排 +'+ENERGY_PER_ROW[difficulty]+' 能量');
+  const d=b.dataset.diff;
+  if(d===difficulty) return;                 // 点的是当前难度，不动
+  // 切难度 = 重新开局（每局锁定一个难度，杜绝「简单玩、困难交卷」刷榜）
+  if(score>0 && !gameover && !confirm('切换难度会重新开始本局，确定吗？')) return;
+  difficulty=d; store.set('mmcs_diff', difficulty); renderDiffSeg();
+  resetGame();
+  toast(DIFF_LABEL[difficulty]+'难度 · 已重新开局（能量 +'+ENERGY_PER_ROW[difficulty]+'/行）');
 });
 
 // 加入主屏：横幅 + 教程
