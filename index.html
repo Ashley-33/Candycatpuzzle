@@ -432,6 +432,7 @@ button:focus-visible, .candy:focus-visible{outline:3px solid #ffe19a; outline-of
       <button data-diff="hard">困难</button>
     </div>
     <div class="set-note">难度影响「🍬出块」和「⚡能量收集」——简单出小块多、能量攒得快；困难大块多、攒得慢。<b>计分规则不变</b>（都是每消一排 +5 分），排行榜按难度分别排名。</div>
+    <button class="bigbtn" id="shareBtn">🔗 分享给朋友</button>
     <button class="bigbtn" id="soundToggle">🔊 音效：开</button>
     <button class="bigbtn gold" id="setRestart">🔄 重新开局</button>
     <button class="bigbtn" id="setClose">关闭</button>
@@ -979,6 +980,14 @@ document.querySelectorAll('#skills .skill').forEach(b=>{
 // 设置弹窗
 $('setBtn').addEventListener('click', ()=>{ pop($('setBtn')); $('setOverlay').classList.add('show'); });
 $('setClose').onclick=()=>$('setOverlay').classList.remove('show');
+// 分享：手机弹系统分享面板；电脑复制链接；都不支持则用 prompt 兜底
+$('shareBtn').onclick=async()=>{
+  const url=location.origin+location.pathname;
+  const data={title:'喵喵糖果星', text:'来玩「喵喵糖果星」🍬 可爱糖果消除小游戏！', url};
+  if(navigator.share){ try{ await navigator.share(data); }catch(e){} return; }   // 取消分享忽略
+  try{ await navigator.clipboard.writeText(url); toast('🔗 链接已复制，去粘贴给朋友吧～'); }
+  catch(e){ prompt('复制这个链接分享给朋友：', url); }
+};
 $('setRestart').onclick=()=>{ const ov=$('setOverlay'); ov.classList.add('fadeout'); resetGame(); setTimeout(()=>{ ov.classList.remove('show','fadeout'); },300); };
 $('soundToggle').onclick=()=>{
   soundOn=!soundOn;
